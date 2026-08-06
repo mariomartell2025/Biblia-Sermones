@@ -22,10 +22,11 @@ export default function SettingsScreen() {
         await Updates.fetchUpdateAsync();
         await Updates.reloadAsync();
       } else {
-        alert(t('actualizacion', lang) === 'Actualización' ? 'Ya tienes la última versión' : 'You are already up to date');
+        alert(lang === 'es' ? '✅ Ya tienes la última versión' : '✅ You are already up to date');
       }
     } catch (e) {
-      alert('Error al verificar actualizaciones');
+      // En desarrollo, es normal que falle. Se habilita cuando publiquemos con eas update
+      alert(lang === 'es' ? '📱 Las actualizaciones se habilitan cuando se publiquen cambios' : '📱 Updates will be available when changes are published');
     } finally {
       setUpdating(false);
     }
