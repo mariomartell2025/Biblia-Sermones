@@ -41,7 +41,7 @@ type View =
 const LAST_KEY = 'bible:last';
 const DEFAULT_POS = { book: 42, chapter: 1 }; // Juan 1 la primera vez
 
-export default function BibleModule({ sermons, onConnectVerse }: { sermons: Sermon[]; onConnectVerse: ConnectFn }) {
+export default function BibleModule({ sermons, onConnectVerse, onSettings }: { sermons: Sermon[]; onConnectVerse: ConnectFn; onSettings?: () => void }) {
   const themeColors = useTheme();
   const settings = useSettings();
 
@@ -192,6 +192,7 @@ export default function BibleModule({ sermons, onConnectVerse }: { sermons: Serm
           onBooks={() => setView({ name: 'books' })}
           onChapters={() => setView({ name: 'chapters', book: view.book })}
           onSearch={() => setView({ name: 'search' })}
+          onSettings={onSettings}
           onChange={(book, chapter) => openReader(book, chapter)}
         />
       );
@@ -304,6 +305,7 @@ function Reader({
   onBooks,
   onChapters,
   onSearch,
+  onSettings,
   onChange,
 }: {
   book: number;
@@ -315,6 +317,7 @@ function Reader({
   onBooks: () => void;
   onChapters: () => void;
   onSearch: () => void;
+  onSettings?: () => void;
   onChange: (book: number, chapter: number) => void;
 }) {
   const b = BOOKS[book];
@@ -358,7 +361,9 @@ function Reader({
       <View style={styles.subHead}>
         <Pressable onPress={onBooks} hitSlop={12}><Text style={styles.back}>☰ Libros</Text></Pressable>
         <Pressable onPress={onChapters} hitSlop={12}><Text style={styles.subTitle}>{b.name} {chapter}  ▾</Text></Pressable>
+        <View style={{ flex: 1 }} />
         <Pressable onPress={onSearch} hitSlop={12}><Text style={styles.searchIconBtn}>🔍</Text></Pressable>
+        <Pressable onPress={onSettings} hitSlop={12}><Text style={[styles.searchIconBtn, { marginLeft: 12 }]}>⚙️</Text></Pressable>
       </View>
       <ScrollView ref={scrollRef} contentContainerStyle={[styles.readerBody, rStyles.scrollContent]}>
         <Text style={styles.chapterTitle}>{b.name} {chapter}</Text>
@@ -382,15 +387,13 @@ function Reader({
         <Text style={styles.readerHint}>Mantén presionado un versículo para conectarlo a un sermón.</Text>
         <View style={{ height: 20 }} />
       </ScrollView>
-      <View style={[styles.readerFooter, { paddingVertical: 8, gap: 4 }]}>
-        <Pressable onPress={prev} hitSlop={8}>
-          <Text style={[styles.navText, { fontSize: 18 }]}>‹</Text>
-        </Pressable>
-        <Text style={styles.footerRef}>{VERSION.abbr}</Text>
-        <Pressable onPress={next} hitSlop={8}>
-          <Text style={[styles.navText, { fontSize: 18 }]}>›</Text>
-        </Pressable>
-      </View>
+      {/* Flechas flotantes para navegar */}
+      <Pressable onPress={prev} style={{ position: 'absolute', left: 16, top: '50%', zIndex: 10 }}>
+        <Text style={[styles.navText, { fontSize: 48, marginTop: -24 }]}>‹</Text>
+      </Pressable>
+      <Pressable onPress={next} style={{ position: 'absolute', right: 16, top: '50%', zIndex: 10 }}>
+        <Text style={[styles.navText, { fontSize: 48, marginTop: -24 }]}>›</Text>
+      </Pressable>
 
       <VerseActions
         verse={selVerse}
