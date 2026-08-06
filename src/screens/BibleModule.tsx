@@ -35,6 +35,7 @@ type ConnectFn = (sermonId: string, v: { ref: string; text: string }) => void;
 type View =
   | { name: 'books' }
   | { name: 'chapters'; book: number }
+  | { name: 'verses'; book: number; chapter: number }
   | { name: 'reader'; book: number; chapter: number; target?: number }
   | { name: 'search' };
 
@@ -177,7 +178,18 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
           book={view.book}
           styles={styles}
           onBack={() => setView({ name: 'books' })}
-          onPick={(chapter) => openReader(view.book, chapter)}
+          onPick={(chapter) => setView({ name: 'verses', book: view.book, chapter })}
+        />
+      );
+    case 'verses':
+      return (
+        <VerseSelector
+          book={view.book}
+          chapter={view.chapter}
+          styles={styles}
+          onBack={() => setView({ name: 'chapters', book: view.book })}
+          onSelectVerse={(verse) => openReader(view.book, view.chapter, verse)}
+          onViewAll={() => openReader(view.book, view.chapter)}
         />
       );
     case 'reader':
@@ -503,6 +515,60 @@ function VerseActions({
         </Pressable>
       </Pressable>
     </Modal>
+  );
+}
+
+/* ---------- Selector de Versículos ---------- */
+function VerseSelector({
+  book,
+  chapter,
+  styles,
+  onBack,
+  onSelectVerse,
+  onViewAll,
+}: {
+  book: number;
+  chapter: number;
+  styles: any;
+  onBack: () => void;
+  onSelectVerse: (verse: number) => void;
+  onViewAll: () => void;
+}) {
+  const b = BOOKS[book];
+  const [verses, setVerses] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    chapterOf(book, chapter).then(setVerses);
+  }, [book, chapter]);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.subHead}>
+        <Pressable onPress={onBack} hitSlop={12}>
+          <Text style={styles.back}>‹ {b.name} {chapter}</Text>
+        </Pressable>
+      </View>
+      <ScrollView style={{ flex: 1, padding: 20 }}>
+        <Text style={[styles.chapterTitle, { marginBottom: 20 }]}>Selecciona un versículo</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+          {verses.map((_, i) => (
+            <Pressable
+              key={i + 1}
+              style={[styles.suggestChip, { paddingVertical: 10, minWidth: 50 }]}
+              onPress={() => onSelectVerse(i + 1)}
+            >
+              <Text style={styles.suggestText}>{i + 1}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Pressable
+          style={[styles.refJump, { marginTop: 20 }]}
+          onPress={onViewAll}
+        >
+          <Text style={styles.refJumpText}>📖 Ver todo el capítulo</Text>
+        </Pressable>
+      </ScrollView>
+    </View>
   );
 }
 
