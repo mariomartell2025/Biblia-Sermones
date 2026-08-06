@@ -219,6 +219,7 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
 function Books({ onPick, onSearch, styles }: { onPick: (b: number) => void; onSearch: () => void; styles: any }) {
   const [versionId, setVersionId] = useState('rvr1909'); // versión activa (única disponible por ahora)
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [isListView, setIsListView] = useState(false);
   const notify = (m: string) => (typeof alert === 'function' ? alert(m) : null);
 
   const sections = useMemo(() => {
@@ -234,9 +235,14 @@ function Books({ onPick, onSearch, styles }: { onPick: (b: number) => void; onSe
     <View style={styles.container}>
       <View style={styles.head}>
         <Text style={styles.h1}>Biblia</Text>
-        <Pressable style={styles.versionChip} onPress={() => setPickerOpen(true)}>
-          <Text style={styles.versionText}>{VERSION.abbr}  ▾</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <Pressable onPress={() => setIsListView(!isListView)} style={styles.versionChip}>
+            <Text style={styles.versionText}>{isListView ? '■■' : '⊞⊞'}</Text>
+          </Pressable>
+          <Pressable style={styles.versionChip} onPress={() => setPickerOpen(true)}>
+            <Text style={styles.versionText}>{VERSION.abbr}  ▾</Text>
+          </Pressable>
+        </View>
       </View>
       <VersionPicker
         visible={pickerOpen}
@@ -253,13 +259,27 @@ function Books({ onPick, onSearch, styles }: { onPick: (b: number) => void; onSe
         {sections.map((sec) => (
           <View key={sec.title}>
             <Text style={styles.sectionHeader}>{sec.title}</Text>
-            <View style={styles.bookGrid}>
-              {sec.data.map((b) => (
-                <Pressable key={b.i} style={styles.bookChip} onPress={() => onPick(b.i)}>
-                  <Text style={styles.bookName} numberOfLines={1}>{b.name}</Text>
-                </Pressable>
-              ))}
-            </View>
+            {isListView ? (
+              <View style={{ paddingHorizontal: 12 }}>
+                {sec.data.map((b) => (
+                  <Pressable
+                    key={b.i}
+                    style={[styles.bookChip, { width: '100%', marginBottom: 8 }]}
+                    onPress={() => onPick(b.i)}
+                  >
+                    <Text style={styles.bookName}>{b.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.bookGrid}>
+                {sec.data.map((b) => (
+                  <Pressable key={b.i} style={styles.bookChip} onPress={() => onPick(b.i)}>
+                    <Text style={styles.bookName} numberOfLines={1}>{b.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
           </View>
         ))}
       </ScrollView>
