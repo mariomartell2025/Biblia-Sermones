@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "biblia-sermones",
-    "slug": "biblia-sermones",
+    "slug": "bendito",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,6 +10,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.mariomartell.bibliasermones",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -23,6 +24,12 @@
     },
     "plugins": [
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "40782bd7-0f9a-4a3d-8f78-cb533105f4d4"
+      }
+    },
+    "owner": "mariomartell7s-team"
   }
 }

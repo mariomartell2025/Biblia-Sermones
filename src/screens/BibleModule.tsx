@@ -11,7 +11,8 @@ import {
 import { Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
-import { theme } from '../theme';
+import { useTheme } from '../useTheme';
+import { useSettings } from '../SettingsContext';
 import { Sermon } from '../types';
 import { useResponsive } from '../useResponsive';
 import { responsiveStyles } from '../responsiveStyles';
@@ -41,9 +42,114 @@ const LAST_KEY = 'bible:last';
 const DEFAULT_POS = { book: 42, chapter: 1 }; // Juan 1 la primera vez
 
 export default function BibleModule({ sermons, onConnectVerse }: { sermons: Sermon[]; onConnectVerse: ConnectFn }) {
+  const themeColors = useTheme();
+  const settings = useSettings();
+
   // Arranca en el lector, en la última posición leída (o Juan 1 la 1a vez).
   const [view, setView] = useState<View | null>(null);
   const [pos, setPos] = useState(DEFAULT_POS); // última posición del lector
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: themeColors.bg },
+    head: {
+      backgroundColor: themeColors.header,
+      paddingTop: 52,
+      paddingBottom: 14,
+      paddingHorizontal: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    h1: { color: themeColors.text, fontSize: 28, fontWeight: '800' },
+    versionChip: { borderWidth: 1, borderColor: themeColors.accent, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
+    versionText: { color: themeColors.accent, fontWeight: '800', fontSize: 12 },
+    subHead: {
+      backgroundColor: themeColors.header,
+      paddingTop: 52,
+      paddingBottom: 14,
+      paddingHorizontal: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    back: { color: themeColors.accent, fontSize: 16, fontWeight: '600' },
+    subTitle: { color: themeColors.text, fontSize: 17, fontWeight: '700' },
+    searchIconBtn: { fontSize: 18 },
+    searchBar: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      marginHorizontal: 16, marginTop: 14, marginBottom: 4,
+      backgroundColor: themeColors.card, borderWidth: 1, borderColor: themeColors.cardBorder,
+      borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
+    },
+    searchIcon: { fontSize: 14 },
+    searchPlaceholder: { color: themeColors.textMuted, fontSize: 14 },
+    sectionHeader: {
+      color: themeColors.textMuted, fontSize: 12, fontWeight: '800', letterSpacing: 0.8,
+      textTransform: 'uppercase', paddingHorizontal: 20, marginTop: 20, marginBottom: 10,
+    },
+    bookGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 8 },
+    bookChip: {
+      width: '31%', backgroundColor: themeColors.card, borderWidth: 1, borderColor: themeColors.cardBorder,
+      borderRadius: 12, paddingVertical: 12, paddingHorizontal: 10, marginBottom: 2,
+    },
+    bookName: { color: themeColors.text, fontWeight: '700', fontSize: 14 },
+    bookMeta: { color: themeColors.textMuted, fontSize: 11, marginTop: 2 },
+    chapCell: {
+      flex: 1, aspectRatio: 1, backgroundColor: themeColors.card, borderWidth: 1, borderColor: themeColors.cardBorder,
+      borderRadius: 12, alignItems: 'center', justifyContent: 'center',
+    },
+    chapNum: { color: themeColors.text, fontSize: 17, fontWeight: '700' },
+    readerBody: { padding: 20, paddingBottom: 8 },
+    chapterTitle: { color: themeColors.text, fontSize: 24, fontWeight: '800', marginBottom: 14 },
+    verseRow: { marginBottom: 6, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 4, marginHorizontal: -6 } as any,
+    verse: { color: themeColors.text, fontSize: settings.fontSize, lineHeight: settings.fontSize * 1.6 },
+    verseNum: { color: themeColors.accent, fontSize: 12, fontWeight: '800' },
+    verseHighlight: { backgroundColor: themeColors.bgElevated, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: themeColors.accent },
+    readerHint: { color: themeColors.textMuted, fontSize: 12, textAlign: 'center', marginTop: 16, opacity: 0.7 },
+    readerFooter: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      padding: 14, paddingBottom: 22, borderTopWidth: 1, borderTopColor: themeColors.cardBorder,
+      backgroundColor: themeColors.bgElevated,
+    },
+    navBtn: { paddingVertical: 6, paddingHorizontal: 8, minWidth: 92 },
+    navText: { color: themeColors.accent, fontWeight: '700', fontSize: 15 },
+    footerRef: { color: themeColors.textMuted, fontSize: 12, fontWeight: '700' },
+    searchInput: {
+      backgroundColor: themeColors.card, borderWidth: 1, borderColor: themeColors.cardBorder, borderRadius: 12,
+      paddingHorizontal: 14, paddingVertical: 12, color: themeColors.text, fontSize: 16,
+    },
+    suggestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+    suggestChip: {
+      backgroundColor: themeColors.card, borderWidth: 1, borderColor: themeColors.cardBorder,
+      borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8,
+    },
+    suggestText: { color: themeColors.text, fontWeight: '600', fontSize: 14 },
+    refJump: {
+      backgroundColor: themeColors.bgElevated, borderWidth: 1, borderColor: themeColors.accent, borderRadius: 12,
+      padding: 14, marginBottom: 12,
+    },
+    refJumpText: { color: themeColors.accent, fontWeight: '800', fontSize: 15 },
+    refPreview: { color: themeColors.text, fontSize: 14, lineHeight: 20, marginTop: 8, opacity: 0.9 },
+    hit: {
+      backgroundColor: themeColors.card, borderWidth: 1, borderColor: themeColors.cardBorder, borderRadius: 12,
+      padding: 14, marginBottom: 10, gap: 4,
+    },
+    hitRef: { color: themeColors.accent, fontWeight: '800', fontSize: 13 },
+    hitText: { color: themeColors.text, fontSize: 14, lineHeight: 20, opacity: 0.9 },
+    noResults: { color: themeColors.textMuted, textAlign: 'center', marginTop: 30 },
+    sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
+    sheet: {
+      backgroundColor: themeColors.bgElevated, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+      padding: 20, paddingBottom: 34, borderTopWidth: 1, borderColor: themeColors.cardBorder,
+    },
+    sheetRef: { color: themeColors.accent, fontWeight: '800', fontSize: 15, marginBottom: 6 },
+    sheetText: { color: themeColors.text, fontSize: 15, lineHeight: 22, marginBottom: 16 },
+    sheetActions: { gap: 10 },
+    sheetBtnPrimary: { backgroundColor: themeColors.accent, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+    sheetBtnPrimaryText: { color: themeColors.accentText, fontWeight: '800', fontSize: 15 },
+    sheetBtnSecondary: { backgroundColor: themeColors.card, borderRadius: 12, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: themeColors.cardBorder },
+    sheetBtnSecondaryText: { color: themeColors.text, fontWeight: '800', fontSize: 15 },
+  });
 
   useEffect(() => {
     AsyncStorage.getItem(LAST_KEY)
@@ -69,6 +175,7 @@ export default function BibleModule({ sermons, onConnectVerse }: { sermons: Serm
       return (
         <Chapters
           book={view.book}
+          styles={styles}
           onBack={() => setView({ name: 'books' })}
           onPick={(chapter) => openReader(view.book, chapter)}
         />
@@ -80,6 +187,7 @@ export default function BibleModule({ sermons, onConnectVerse }: { sermons: Serm
           chapter={view.chapter}
           target={view.target}
           sermons={sermons}
+          styles={styles}
           onConnectVerse={onConnectVerse}
           onBooks={() => setView({ name: 'books' })}
           onChapters={() => setView({ name: 'chapters', book: view.book })}
@@ -90,6 +198,7 @@ export default function BibleModule({ sermons, onConnectVerse }: { sermons: Serm
     case 'search':
       return (
         <Search
+          styles={styles}
           onBack={() => setView({ name: 'reader', book: pos.book, chapter: pos.chapter })}
           onOpen={(book, chapter, verse) => openReader(book, chapter, verse)}
         />
@@ -97,6 +206,7 @@ export default function BibleModule({ sermons, onConnectVerse }: { sermons: Serm
     default:
       return (
         <Books
+          styles={styles}
           onSearch={() => setView({ name: 'search' })}
           onPick={(book) => setView({ name: 'chapters', book })}
         />
@@ -105,7 +215,7 @@ export default function BibleModule({ sermons, onConnectVerse }: { sermons: Serm
 }
 
 /* ---------- Libros ---------- */
-function Books({ onPick, onSearch }: { onPick: (b: number) => void; onSearch: () => void }) {
+function Books({ onPick, onSearch, styles }: { onPick: (b: number) => void; onSearch: () => void; styles: any }) {
   const [versionId, setVersionId] = useState('rvr1909'); // versión activa (única disponible por ahora)
   const [pickerOpen, setPickerOpen] = useState(false);
   const notify = (m: string) => (typeof alert === 'function' ? alert(m) : null);
@@ -146,7 +256,6 @@ function Books({ onPick, onSearch }: { onPick: (b: number) => void; onSearch: ()
               {sec.data.map((b) => (
                 <Pressable key={b.i} style={styles.bookChip} onPress={() => onPick(b.i)}>
                   <Text style={styles.bookName} numberOfLines={1}>{b.name}</Text>
-                  <Text style={styles.bookMeta}>{b.chapters} cap.</Text>
                 </Pressable>
               ))}
             </View>
@@ -158,7 +267,7 @@ function Books({ onPick, onSearch }: { onPick: (b: number) => void; onSearch: ()
 }
 
 /* ---------- Capítulos ---------- */
-function Chapters({ book, onBack, onPick }: { book: number; onBack: () => void; onPick: (c: number) => void }) {
+function Chapters({ book, onBack, onPick, styles }: { book: number; onBack: () => void; onPick: (c: number) => void; styles: any }) {
   const b: BookMeta = BOOKS[book];
   const nums = Array.from({ length: b.chapters }, (_, i) => i + 1);
   return (
@@ -190,6 +299,7 @@ function Reader({
   chapter,
   target,
   sermons,
+  styles,
   onConnectVerse,
   onBooks,
   onChapters,
@@ -200,6 +310,7 @@ function Reader({
   chapter: number;
   target?: number;
   sermons: Sermon[];
+  styles: any;
   onConnectVerse: ConnectFn;
   onBooks: () => void;
   onChapters: () => void;
@@ -215,6 +326,15 @@ function Reader({
     chapterOf(book, chapter).then(v => { if (alive) setVerses(v); });
     return () => { alive = false; };
   }, [book, chapter]);
+
+  useEffect(() => {
+    if (target && scrollRef.current) {
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({ y: (target - 1) * 60, animated: true });
+      }, 100);
+    }
+  }, [target]);
+
   useLogChapterRead(book, chapter);
   const scrollRef = useRef<ScrollView>(null);
   const [selected, setSelected] = useState<number | null>(null); // versículo con menú abierto
@@ -262,19 +382,20 @@ function Reader({
         <Text style={styles.readerHint}>Mantén presionado un versículo para conectarlo a un sermón.</Text>
         <View style={{ height: 20 }} />
       </ScrollView>
-      <View style={styles.readerFooter}>
-        <Pressable style={styles.navBtn} onPress={prev}>
-          <Text style={styles.navText}>‹ Anterior</Text>
+      <View style={[styles.readerFooter, { paddingVertical: 8, gap: 4 }]}>
+        <Pressable onPress={prev} hitSlop={8}>
+          <Text style={[styles.navText, { fontSize: 18 }]}>‹</Text>
         </Pressable>
         <Text style={styles.footerRef}>{VERSION.abbr}</Text>
-        <Pressable style={styles.navBtn} onPress={next}>
-          <Text style={styles.navText}>Siguiente ›</Text>
+        <Pressable onPress={next} hitSlop={8}>
+          <Text style={[styles.navText, { fontSize: 18 }]}>›</Text>
         </Pressable>
       </View>
 
       <VerseActions
         verse={selVerse}
         sermons={sermons}
+        styles={styles}
         onConnect={(id) => { if (selVerse) onConnectVerse(id, selVerse); setSelected(null); }}
         onClose={() => setSelected(null)}
       />
@@ -286,11 +407,13 @@ function Reader({
 function VerseActions({
   verse,
   sermons,
+  styles,
   onConnect,
   onClose,
 }: {
   verse: { ref: string; text: string } | null;
   sermons: Sermon[];
+  styles: any;
   onConnect: (sermonId: string) => void;
   onClose: () => void;
 }) {
@@ -364,9 +487,11 @@ function VerseActions({
 function Search({
   onBack,
   onOpen,
+  styles,
 }: {
   onBack: () => void;
   onOpen: (book: number, chapter: number, verse?: number) => void;
+  styles: any;
 }) {
   const responsive = useResponsive();
   const rStyles = responsiveStyles(responsive);
@@ -439,111 +564,3 @@ function Search({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.bg },
-  head: {
-    backgroundColor: theme.header,
-    paddingTop: 52,
-    paddingBottom: 14,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  h1: { color: theme.text, fontSize: 28, fontWeight: '800' },
-  versionChip: { borderWidth: 1, borderColor: theme.accent, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
-  versionText: { color: theme.accent, fontWeight: '800', fontSize: 12 },
-  subHead: {
-    backgroundColor: theme.header,
-    paddingTop: 52,
-    paddingBottom: 14,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  back: { color: theme.accent, fontSize: 16, fontWeight: '600' },
-  subTitle: { color: theme.text, fontSize: 17, fontWeight: '700' },
-  searchIconBtn: { fontSize: 18 },
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 16, marginTop: 14, marginBottom: 4,
-    backgroundColor: theme.card, borderWidth: 1, borderColor: theme.cardBorder,
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
-  },
-  searchIcon: { fontSize: 14 },
-  searchPlaceholder: { color: theme.textMuted, fontSize: 14 },
-  sectionHeader: {
-    color: theme.textMuted, fontSize: 12, fontWeight: '800', letterSpacing: 0.8,
-    textTransform: 'uppercase', paddingHorizontal: 20, marginTop: 20, marginBottom: 10,
-  },
-  bookGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 8 },
-  bookChip: {
-    width: '31%', backgroundColor: theme.card, borderWidth: 1, borderColor: theme.cardBorder,
-    borderRadius: 12, paddingVertical: 12, paddingHorizontal: 10, marginBottom: 2,
-  },
-  bookName: { color: theme.text, fontWeight: '700', fontSize: 14 },
-  bookMeta: { color: theme.textMuted, fontSize: 11, marginTop: 2 },
-  chapCell: {
-    flex: 1, aspectRatio: 1, backgroundColor: theme.card, borderWidth: 1, borderColor: theme.cardBorder,
-    borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-  },
-  chapNum: { color: theme.text, fontSize: 17, fontWeight: '700' },
-  readerBody: { padding: 20, paddingBottom: 8 },
-  chapterTitle: { color: theme.text, fontSize: 24, fontWeight: '800', marginBottom: 14 },
-  verseRow: { marginBottom: 6, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 4, marginHorizontal: -6 } as any,
-  verse: { color: theme.text, fontSize: 17, lineHeight: 28 },
-  verseNum: { color: theme.accent, fontSize: 12, fontWeight: '800' },
-  verseHighlight: { backgroundColor: '#22304d' },
-  readerHint: { color: theme.textMuted, fontSize: 12, textAlign: 'center', marginTop: 16, opacity: 0.7 },
-  readerFooter: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    padding: 14, paddingBottom: 22, borderTopWidth: 1, borderTopColor: theme.cardBorder,
-    backgroundColor: theme.bgElevated,
-  },
-  navBtn: { paddingVertical: 6, paddingHorizontal: 8, minWidth: 92 },
-  navText: { color: theme.accent, fontWeight: '700', fontSize: 15 },
-  footerRef: { color: theme.textMuted, fontSize: 12, fontWeight: '700' },
-  searchInput: {
-    backgroundColor: theme.card, borderWidth: 1, borderColor: theme.cardBorder, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 12, color: theme.text, fontSize: 16,
-  },
-  suggestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  suggestChip: {
-    backgroundColor: theme.card, borderWidth: 1, borderColor: theme.cardBorder,
-    borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8,
-  },
-  suggestText: { color: theme.text, fontWeight: '600', fontSize: 14 },
-  refJump: {
-    backgroundColor: '#1a2740', borderWidth: 1, borderColor: theme.accent, borderRadius: 12,
-    padding: 14, marginBottom: 12,
-  },
-  refJumpText: { color: theme.accent, fontWeight: '800', fontSize: 15 },
-  refPreview: { color: theme.text, fontSize: 14, lineHeight: 20, marginTop: 8, opacity: 0.9 },
-  hit: {
-    backgroundColor: theme.card, borderWidth: 1, borderColor: theme.cardBorder, borderRadius: 12,
-    padding: 14, marginBottom: 10, gap: 4,
-  },
-  hitRef: { color: theme.accent, fontWeight: '800', fontSize: 13 },
-  hitText: { color: theme.text, fontSize: 14, lineHeight: 20, opacity: 0.9 },
-  noResults: { color: theme.textMuted, textAlign: 'center', marginTop: 30 },
-
-  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
-  sheet: {
-    backgroundColor: theme.bgElevated, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 20, paddingBottom: 34, borderTopWidth: 1, borderColor: theme.cardBorder,
-  },
-  sheetRef: { color: theme.accent, fontWeight: '800', fontSize: 15, marginBottom: 6 },
-  sheetText: { color: theme.text, fontSize: 15, lineHeight: 22, marginBottom: 16 },
-  sheetActions: { gap: 10 },
-  sheetBtnPrimary: { backgroundColor: theme.accent, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
-  sheetBtnPrimaryText: { color: theme.accentText, fontWeight: '800', fontSize: 15 },
-  sheetBtn: {
-    backgroundColor: theme.card, borderWidth: 1, borderColor: theme.cardBorder, borderRadius: 12,
-    paddingVertical: 13, alignItems: 'center',
-  },
-  sheetBtnText: { color: theme.text, fontWeight: '600', fontSize: 15 },
-  sheetBtnMuted: { color: theme.textMuted, fontWeight: '600', fontSize: 15 },
-  sheetPickLabel: { color: theme.textMuted, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
-  sheetDone: { color: '#5fd39a', fontWeight: '800', fontSize: 16, textAlign: 'center', paddingVertical: 18 },
-});

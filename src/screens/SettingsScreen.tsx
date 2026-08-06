@@ -1,15 +1,53 @@
 import React from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet, Switch } from 'react-native';
-import { theme } from '../theme';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { useTheme } from '../useTheme';
 import { useSettings } from '../SettingsContext';
 import { t, Theme, Language } from '../settings';
 
 export default function SettingsScreen() {
   const settings = useSettings();
+  const themeColors = useTheme();
   const lang = settings.language;
 
   const themeOptions: Theme[] = ['light', 'dark', 'sepia'];
   const languageOptions: Language[] = ['es', 'en'];
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: themeColors.bg },
+    header: {
+      backgroundColor: themeColors.header,
+      paddingTop: 52,
+      paddingBottom: 14,
+      paddingHorizontal: 20,
+    },
+    headerTitle: { color: themeColors.text, fontSize: 20, fontWeight: '800' },
+    body: { padding: 20, gap: 24, paddingBottom: 60 },
+    section: { gap: 10 },
+    sectionTitle: { color: themeColors.text, fontSize: 16, fontWeight: '800' },
+    optionRow: { flexDirection: 'row', gap: 10 },
+    optionBtn: {
+      flex: 1,
+      backgroundColor: themeColors.card,
+      borderWidth: 1,
+      borderColor: themeColors.cardBorder,
+      borderRadius: 10,
+      paddingVertical: 12,
+      paddingHorizontal: 10,
+      alignItems: 'center',
+    },
+    optionBtnActive: { borderColor: themeColors.accent, backgroundColor: themeColors.bgElevated },
+    optionText: { color: themeColors.text, fontWeight: '600', fontSize: 13, textAlign: 'center' },
+    optionTextActive: { color: themeColors.accent, fontWeight: '800' },
+    sliderContainer: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    sliderLabel: { color: themeColors.textMuted, fontWeight: '700', fontSize: 12, width: 20 },
+    sliderTrack: { flex: 1, flexDirection: 'row', gap: 3, alignItems: 'center' },
+    sliderDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: themeColors.cardBorder },
+    sliderDotActive: { backgroundColor: themeColors.accent, width: 12, height: 12, borderRadius: 6 },
+    preview: { color: themeColors.text, textAlign: 'center', marginTop: 12, fontWeight: '500', lineHeight: 26, fontSize: settings.fontSize },
+    infoBox: { marginTop: 20, padding: 16, backgroundColor: themeColors.bgElevated, borderRadius: 12, borderWidth: 1, borderColor: themeColors.cardBorder, alignItems: 'center' },
+    infoText: { color: themeColors.text, fontWeight: '800', fontSize: 14 },
+    infoSubtext: { color: themeColors.textMuted, fontSize: 12, marginTop: 4 },
+  });
 
   return (
     <View style={styles.container}>
@@ -46,9 +84,12 @@ export default function SettingsScreen() {
                 style={[styles.optionBtn, settings.theme === th && styles.optionBtnActive]}
                 onPress={() => settings.setTheme(th)}
               >
-                <Text style={[styles.optionText, settings.theme === th && styles.optionTextActive]}>
-                  {th === 'light' ? '☀️' : th === 'dark' ? '🌙' : '📖'} {t(th as any, lang)}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: 16 }}>{th === 'light' ? '☀️' : th === 'dark' ? '🌙' : '📖'}</Text>
+                  <Text style={[styles.optionText, settings.theme === th && styles.optionTextActive, { marginTop: 0 }]}>
+                    {t(th as any, lang)}
+                  </Text>
+                </View>
               </Pressable>
             ))}
           </View>
@@ -70,7 +111,7 @@ export default function SettingsScreen() {
             </View>
             <Text style={styles.sliderLabel}>20</Text>
           </View>
-          <Text style={[styles.preview, { fontSize: settings.fontSize }]}>
+          <Text style={styles.preview}>
             Abc 123 Versículo
           </Text>
         </View>
@@ -84,40 +125,3 @@ export default function SettingsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.bg },
-  header: {
-    backgroundColor: theme.header,
-    paddingTop: 52,
-    paddingBottom: 14,
-    paddingHorizontal: 20,
-  },
-  headerTitle: { color: theme.text, fontSize: 20, fontWeight: '800' },
-  body: { padding: 20, gap: 24, paddingBottom: 60 },
-  section: { gap: 10 },
-  sectionTitle: { color: theme.text, fontSize: 16, fontWeight: '800' },
-  optionRow: { flexDirection: 'row', gap: 10 },
-  optionBtn: {
-    flex: 1,
-    backgroundColor: theme.card,
-    borderWidth: 1,
-    borderColor: theme.cardBorder,
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-  },
-  optionBtnActive: { borderColor: theme.accent, backgroundColor: '#1a2740' },
-  optionText: { color: theme.text, fontWeight: '600', fontSize: 13, textAlign: 'center' },
-  optionTextActive: { color: theme.accent, fontWeight: '800' },
-  sliderContainer: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  sliderLabel: { color: theme.textMuted, fontWeight: '700', fontSize: 12, width: 20 },
-  sliderTrack: { flex: 1, flexDirection: 'row', gap: 3, alignItems: 'center' },
-  sliderDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.cardBorder },
-  sliderDotActive: { backgroundColor: theme.accent, width: 12, height: 12, borderRadius: 6 },
-  preview: { color: theme.text, textAlign: 'center', marginTop: 12, fontWeight: '500', lineHeight: 26 },
-  infoBox: { marginTop: 20, padding: 16, backgroundColor: theme.bgElevated, borderRadius: 12, borderWidth: 1, borderColor: theme.cardBorder, alignItems: 'center' },
-  infoText: { color: theme.text, fontWeight: '800', fontSize: 14 },
-  infoSubtext: { color: theme.textMuted, fontSize: 12, marginTop: 4 },
-});

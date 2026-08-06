@@ -31,7 +31,7 @@ function emptySermon(): Sermon {
 }
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('sermones');
+  const [tab, setTab] = useState<Tab>('biblia');
   const [sermons, setSermons] = useState<Sermon[] | null>(null);
   const [screen, setScreen] = useState<Screen>({ name: 'list' });
   const [draft, setDraft] = useState<Sermon | null>(null); // borrador nuevo aún no persistido
