@@ -29,6 +29,7 @@ import {
 } from '../bible/data';
 import { chapterOf, searchOf } from '../bible/query';
 import { useFavorite, useLogChapterRead } from '../bible/useBible';
+import { searchDictionary } from '../bible/dictionary';
 
 type ConnectFn = (sermonId: string, v: { ref: string; text: string }) => void;
 
@@ -584,6 +585,8 @@ function Search({
 }) {
   const responsive = useResponsive();
   const rStyles = responsiveStyles(responsive);
+  const settings = useSettings();
+  const lang = settings.language as 'es' | 'en';
   const [q, setQ] = useState('');
   const ref = parseRef(q);
   const hasDigit = /\d/.test(q);
@@ -592,6 +595,8 @@ function Search({
   // Vista previa del versículo referenciado.
   const preview = ref && ref.verse ? getVerseText(ref.book, ref.chapter, ref.verse) : null;
   const [hits, setHits] = useState<VerseHit[]>([]);
+  const dictionaryResults = useMemo(() => (q.trim().length >= 3 ? searchDictionary(q, lang) : []), [q, lang]);
+
   useEffect(() => {
     if (q.trim().length < 3) { setHits([]); return; }
     let alive = true;
@@ -638,6 +643,22 @@ function Search({
           </Pressable>
         )}
 
+        {/* Resultados del diccionario */}
+        {dictionaryResults.length > 0 && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={[styles.sectionHeader, { paddingLeft: 0, marginBottom: 12 }]}>
+              📖 {lang === 'es' ? 'Palabras Bíblicas' : 'Biblical Words'}
+            </Text>
+            {dictionaryResults.map((entry, k) => (
+              <View key={k} style={[styles.hit, { marginBottom: 12 }]}>
+                <Text style={styles.hitRef}>{entry.word}</Text>
+                <Text style={styles.hitText}>{entry.definition[lang]}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Resultados de versículos */}
         {hits.map((h, k) => (
           <Pressable key={k} style={styles.hit} onPress={() => onOpen(h.book, h.chapter, h.verse)}>
             <Text style={styles.hitRef}>{h.abbr} {h.chapter}:{h.verse}</Text>
@@ -645,7 +666,7 @@ function Search({
           </Pressable>
         ))}
 
-        {q.trim().length >= 3 && hits.length === 0 && !ref && books.length === 0 && (
+        {q.trim().length >= 3 && hits.length === 0 && dictionaryResults.length === 0 && !ref && books.length === 0 && (
           <Text style={styles.noResults}>Sin resultados para “{q}”.</Text>
         )}
       </ScrollView>
