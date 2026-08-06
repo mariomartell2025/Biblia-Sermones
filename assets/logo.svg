@@ -1,0 +1,47 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo -->
+  <rect width="512" height="512" fill="#0b1018"/>
+
+  <!-- Biblia (lado izquierdo) -->
+  <g transform="translate(80, 140)">
+    <!-- Lomo del libro -->
+    <rect x="0" y="0" width="40" height="160" fill="#6ea8fe" rx="4"/>
+    <!-- Páginas -->
+    <rect x="45" y="10" width="70" height="140" fill="#e8ecf4" rx="3"/>
+    <line x1="48" y1="30" x2="112" y2="30" stroke="#6ea8fe" stroke-width="3"/>
+    <line x1="48" y1="50" x2="112" y2="50" stroke="#9aa4b8" stroke-width="2"/>
+    <line x1="48" y1="65" x2="112" y2="65" stroke="#9aa4b8" stroke-width="2"/>
+    <line x1="48" y1="80" x2="112" y2="80" stroke="#9aa4b8" stroke-width="2"/>
+    <line x1="48" y1="95" x2="105" y2="95" stroke="#9aa4b8" stroke-width="2"/>
+    <line x1="48" y1="110" x2="110" y2="110" stroke="#9aa4b8" stroke-width="2"/>
+    <line x1="48" y1="125" x2="100" y2="125" stroke="#9aa4b8" stroke-width="2"/>
+  </g>
+
+  <!-- Micrófono (lado derecho, sermón) -->
+  <g transform="translate(280, 120)">
+    <!-- Cabeza del micrófono -->
+    <ellipse cx="60" cy="30" rx="25" ry="30" fill="#6ea8fe"/>
+    <!-- Rejilla -->
+    <circle cx="60" cy="30" r="20" fill="none" stroke="#0b1018" stroke-width="2"/>
+    <line x1="40" y1="30" x2="80" y2="30" stroke="#0b1018" stroke-width="1.5"/>
+    <line x1="42" y1="15" x2="78" y2="15" stroke="#0b1018" stroke-width="1.5"/>
+    <line x1="42" y1="45" x2="78" y2="45" stroke="#0b1018" stroke-width="1.5"/>
+
+    <!-- Tubo/cuello -->
+    <rect x="52" y="55" width="16" height="40" fill="#6ea8fe" rx="8"/>
+
+    <!-- Soporte -->
+    <ellipse cx="60" cy="105" rx="20" ry="12" fill="#9aa4b8"/>
+
+    <!-- Pie del micrófono -->
+    <rect x="55" y="110" width="10" height="40" fill="#9aa4b8" rx="5"/>
+  </g>
+
+  <!-- Nombre de la app (texto) -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#e8ecf4" text-anchor="middle">
+    Biblia + Sermones
+  </text>
+  <text x="256" y="460" font-family="Arial, sans-serif" font-size="20" fill="#9aa4b8" text-anchor="middle">
+    Offline. Libre. Para predicadores.
+  </text>
+</svg>

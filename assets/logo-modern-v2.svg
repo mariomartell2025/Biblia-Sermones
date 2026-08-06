@@ -1,0 +1,40 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo degradado sutil -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5f7fa;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bgGradient)"/>
+
+  <!-- Icono central: Biblia estilizada -->
+  <g transform="translate(156, 100)">
+    <!-- Lomo de libro izquierdo (línea vertical) -->
+    <rect x="30" y="15" width="8" height="140" fill="#6ea8fe" rx="4"/>
+
+    <!-- Páginas derechas -->
+    <path d="M 50 15 L 200 15 Q 210 15 210 25 L 210 140 Q 210 150 200 150 L 50 150 Z"
+          fill="none" stroke="#6ea8fe" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Líneas de contenido (texto en páginas) -->
+    <line x1="65" y1="40" x2="145" y2="40" stroke="#6ea8fe" stroke-width="3" stroke-linecap="round"/>
+    <line x1="65" y1="60" x2="195" y2="60" stroke="#9aa4b8" stroke-width="2" stroke-linecap="round"/>
+    <line x1="65" y1="75" x2="195" y2="75" stroke="#9aa4b8" stroke-width="2" stroke-linecap="round"/>
+    <line x1="65" y1="90" x2="190" y2="90" stroke="#9aa4b8" stroke-width="2" stroke-linecap="round"/>
+    <line x1="65" y1="105" x2="185" y2="105" stroke="#9aa4b8" stroke-width="2" stroke-linecap="round"/>
+    <line x1="65" y1="120" x2="175" y2="120" stroke="#9aa4b8" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Nombre principal -->
+  <text x="256" y="340" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
+        font-size="52" font-weight="700" fill="#1d1d1f" text-anchor="middle" letter-spacing="-1">
+    Biblia + Sermones
+  </text>
+
+  <!-- Tagline -->
+  <text x="256" y="395" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        font-size="24" font-weight="400" fill="#86868b" text-anchor="middle">
+    Para predicadores
+  </text>
+</svg>

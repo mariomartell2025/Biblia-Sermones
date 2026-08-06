@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Logos - Biblia + Sermones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf4 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            color: #1d1d1f;
+            margin-bottom: 50px;
+            font-size: 32px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .logo-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .logo-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+        }
+
+        .logo-preview {
+            width: 280px;
+            height: 280px;
+            background: #f5f7fa;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-top: 10px;
+        }
+
+        .logo-desc {
+            font-size: 14px;
+            color: #86868b;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-select {
+            background: #6ea8fe;
+            color: white;
+        }
+
+        .btn-select:hover {
+            background: #5b9cfe;
+        }
+
+        .btn-download {
+            background: #f5f7fa;
+            color: #1d1d1f;
+        }
+
+        .btn-download:hover {
+            background: #e8ecf4;
+        }
+
+        .selected {
+            border: 3px solid #6ea8fe;
+            background: #f0f6ff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 30px;
+            }
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: #86868b;
+            font-size: 14px;
+        }
+
+        .selected-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .selected-info h3 {
+            color: #6ea8fe;
+            margin-bottom: 8px;
+        }
+
+        .selected-info p {
+            color: #86868b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Preview Logos</h1>
+
+    <div class="container">
+        <!-- V1: BS + Biblia Sermones -->
+        <div class="logo-box" id="v1-box">
+            <div class="logo-preview">
+                <img src="logo-modern-v1.svg" alt="Logo V1">
+            </div>
+            <div class="logo-title">Versión 1: BS Minimalista</div>
+            <div class="logo-desc">
+                Icono pequeño + "BS" grande<br>
+                Ideal para: Icono de app (perfecto)
+            </div>
+            <div class="btn-container">
+                <button class="btn btn-select" onclick="selectLogo('v1')">Elegir V1</button>
+                <button class="btn btn-download" onclick="downloadLogo('v1')">Descargar</button>
+            </div>
+        </div>
+
+        <!-- V2: Biblia + Sermones completo -->
+        <div class="logo-box" id="v2-box">
+            <div class="logo-preview">
+                <img src="logo-modern-v2.svg" alt="Logo V2">
+            </div>
+            <div class="logo-title">Versión 2: Completa</div>
+            <div class="logo-desc">
+                Icono + Nombre completo<br>
+                Ideal para: Imagen destacada Play Store
+            </div>
+            <div class="btn-container">
+                <button class="btn btn-select" onclick="selectLogo('v2')">Elegir V2</button>
+                <button class="btn btn-download" onclick="downloadLogo('v2')">Descargar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="selected-info" id="selected-info" style="display:none;">
+        <h3>✓ Seleccionado</h3>
+        <p id="selected-text"></p>
+    </div>
+
+    <div class="footer">
+        <p>💡 Selecciona el logo que más te guste</p>
+        <p>Ambos están optimizados para Apple/moderna</p>
+    </div>
+
+    <script>
+        let selectedLogo = null;
+
+        function selectLogo(version) {
+            selectedLogo = version;
+
+            // Update UI
+            document.getElementById('v1-box').classList.toggle('selected', version === 'v1');
+            document.getElementById('v2-box').classList.toggle('selected', version === 'v2');
+
+            // Show selected info
+            const infoEl = document.getElementById('selected-info');
+            const textEl = document.getElementById('selected-text');
+
+            if (version === 'v1') {
+                textEl.textContent = 'V1 seleccionado - BS Minimalista. Usa este como icon.png (512x512)';
+            } else {
+                textEl.textContent = 'V2 seleccionado - Completo. Usa este para featured-image.png (1024x500)';
+            }
+
+            infoEl.style.display = 'block';
+        }
+
+        function downloadLogo(version) {
+            const filename = version === 'v1' ? 'logo-modern-v1.svg' : 'logo-modern-v2.svg';
+            const link = document.createElement('a');
+            link.href = filename;
+            link.download = filename;
+            link.click();
+        }
+    </script>
+</body>
+</html>
