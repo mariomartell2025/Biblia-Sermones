@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import * as Updates from 'expo-updates';
 import { useTheme } from '../useTheme';
 import { useSettings } from '../SettingsContext';
 import { t, Theme, Language } from '../settings';
@@ -8,9 +9,27 @@ export default function SettingsScreen() {
   const settings = useSettings();
   const themeColors = useTheme();
   const lang = settings.language;
+  const [updating, setUpdating] = useState(false);
 
   const themeOptions: Theme[] = ['light', 'dark', 'sepia'];
   const languageOptions: Language[] = ['es', 'en'];
+
+  const checkForUpdates = async () => {
+    try {
+      setUpdating(true);
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      } else {
+        alert(t('actualizacion', lang) === 'Actualización' ? 'Ya tienes la última versión' : 'You are already up to date');
+      }
+    } catch (e) {
+      alert('Error al verificar actualizaciones');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: themeColors.bg },
@@ -44,6 +63,9 @@ export default function SettingsScreen() {
     sliderDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: themeColors.cardBorder },
     sliderDotActive: { backgroundColor: themeColors.accent, width: 12, height: 12, borderRadius: 6 },
     preview: { color: themeColors.text, textAlign: 'center', marginTop: 12, fontWeight: '500', lineHeight: 26, fontSize: settings.fontSize },
+    updateBtn: { backgroundColor: themeColors.accent, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 12 },
+    updateBtnDisabled: { opacity: 0.6 },
+    updateBtnText: { color: themeColors.accentText, fontWeight: '800', fontSize: 15 },
     infoBox: { marginTop: 20, padding: 16, backgroundColor: themeColors.bgElevated, borderRadius: 12, borderWidth: 1, borderColor: themeColors.cardBorder, alignItems: 'center' },
     infoText: { color: themeColors.text, fontWeight: '800', fontSize: 14 },
     infoSubtext: { color: themeColors.textMuted, fontSize: 12, marginTop: 4 },
@@ -115,6 +137,19 @@ export default function SettingsScreen() {
             Abc 123 Versículo
           </Text>
         </View>
+
+        {/* Actualizar */}
+        <Pressable
+          style={[styles.updateBtn, updating && styles.updateBtnDisabled]}
+          onPress={checkForUpdates}
+          disabled={updating}
+        >
+          {updating ? (
+            <ActivityIndicator color={themeColors.accentText} />
+          ) : (
+            <Text style={styles.updateBtnText}>🔄 Actualizar App</Text>
+          )}
+        </Pressable>
 
         {/* Info */}
         <View style={styles.infoBox}>
