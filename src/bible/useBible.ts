@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { isFavorite, addFavorite, removeFavorite } from './favorites';
 import { logChapterRead, getHistory, HistoryEntry } from './history';
+import { getChapterHighlights, setHighlight, removeHighlight } from './highlights';
 import { suggestVerses } from './themes';
 import { VerseHit } from './data';
 
@@ -32,6 +33,32 @@ export function useFavorite(book: number, chapter: number, verse: number, versio
   };
 
   return { isFav, toggle, loading };
+}
+
+export function useChapterHighlights(book: number, chapter: number, version = DEFAULT_VERSION) {
+  const [highlights, setHighlights] = useState<Record<number, string>>({});
+
+  const reload = useCallback(() => {
+    getChapterHighlights(version, book, chapter).then(setHighlights);
+  }, [book, chapter, version]);
+
+  useEffect(() => { reload(); }, [reload]);
+
+  const apply = async (verse: number, color: string | null) => {
+    if (color) {
+      await setHighlight(version, book, chapter, verse, color);
+      setHighlights((prev) => ({ ...prev, [verse]: color }));
+    } else {
+      await removeHighlight(version, book, chapter, verse);
+      setHighlights((prev) => {
+        const next = { ...prev };
+        delete next[verse];
+        return next;
+      });
+    }
+  };
+
+  return { highlights, apply };
 }
 
 export function useLogChapterRead(book: number, chapter: number, version = DEFAULT_VERSION) {

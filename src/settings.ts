@@ -5,13 +5,15 @@ export type Theme = 'light' | 'dark' | 'sepia';
 
 export interface AppSettings {
   language: Language;
+  languageChosen: boolean; // true tras elegir idioma en la pantalla de bienvenida
   theme: Theme;
-  fontSize: number; // 14-20
+  fontSize: number; // 14-30
   defaultVersion: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
   language: 'es',
+  languageChosen: false,
   theme: 'dark',
   fontSize: 17,
   defaultVersion: 'rvr1909',
@@ -23,7 +25,9 @@ export async function loadSettings(): Promise<AppSettings> {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    // Si ya había configuración guardada (instalación existente), no forzar el
+    // onboarding de idioma solo porque el campo 'languageChosen' es nuevo.
+    return { ...DEFAULT_SETTINGS, languageChosen: true, ...JSON.parse(raw) };
   } catch (e) {
     console.warn('Error loading settings:', e);
     return DEFAULT_SETTINGS;

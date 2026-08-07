@@ -30,13 +30,16 @@
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 30000,
-      "url": "https://updates.expo.dev/40782bd7-0f9a-4a3d-8f78-cb533105f4d4"
+      "url": "https://u.expo.dev/40782bd7-0f9a-4a3d-8f78-cb533105f4d4"
     },
     "extra": {
       "eas": {
         "projectId": "40782bd7-0f9a-4a3d-8f78-cb533105f4d4"
       }
     },
-    "owner": "mariomartell7s-team"
+    "owner": "mariomartell7s-team",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }

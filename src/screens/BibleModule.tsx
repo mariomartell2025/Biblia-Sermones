@@ -15,8 +15,11 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import { useTheme } from '../useTheme';
+import { ThemeColors } from '../theme';
 import { useSettings } from '../SettingsContext';
 import { Sermon } from '../types';
+import { HIGHLIGHT_COLORS } from '../bible/highlights';
+import { getFavorites, FavoriteVerse } from '../bible/favorites';
 import { useResponsive } from '../useResponsive';
 import { responsiveStyles } from '../responsiveStyles';
 import VersionPicker from '../bible/VersionPicker';
@@ -31,7 +34,7 @@ import {
   formatRef,
 } from '../bible/data';
 import { chapterOf, searchOf } from '../bible/query';
-import { useFavorite, useLogChapterRead } from '../bible/useBible';
+import { useFavorite, useLogChapterRead, useChapterHighlights } from '../bible/useBible';
 import { searchDictionary } from '../bible/dictionary';
 import { theme } from '../theme';
 
@@ -42,7 +45,8 @@ type View =
   | { name: 'chapters'; book: number }
   | { name: 'verses'; book: number; chapter: number }
   | { name: 'reader'; book: number; chapter: number; target?: number }
-  | { name: 'search' };
+  | { name: 'search' }
+  | { name: 'favorites' };
 
 const LAST_KEY = 'bible:last';
 const DEFAULT_POS = { book: 42, chapter: 1 }; // Juan 1 la primera vez
@@ -52,7 +56,7 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
   const settings = useSettings();
 
   // Arranca en el lector, en la última posición leída (o Juan 1 la 1a vez).
-  const [view, setView] = useState<View | null>(null);
+  const [view, setView] = useState<View>({ name: 'reader', ...DEFAULT_POS });
   const [pos, setPos] = useState(DEFAULT_POS); // última posición del lector
 
   const styles = StyleSheet.create({
@@ -155,6 +159,18 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
     sheetBtnPrimaryText: { color: themeColors.accentText, fontWeight: '800', fontSize: 15 },
     sheetBtnSecondary: { backgroundColor: themeColors.card, borderRadius: 12, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: themeColors.cardBorder },
     sheetBtnSecondaryText: { color: themeColors.text, fontWeight: '800', fontSize: 15 },
+    sheetBtn: {
+      flexDirection: 'row', alignItems: 'center', gap: 10,
+      backgroundColor: themeColors.card, borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16,
+      borderWidth: 1, borderColor: themeColors.cardBorder,
+    },
+    sheetBtnText: { color: themeColors.text, fontWeight: '700', fontSize: 15 },
+    sheetBtnMuted: { color: themeColors.textMuted, fontWeight: '700', fontSize: 15, textAlign: 'center', width: '100%' },
+    sheetDone: { color: themeColors.accent, fontWeight: '800', fontSize: 16, textAlign: 'center', paddingVertical: 20 },
+    sheetPickLabel: { color: themeColors.textMuted, fontSize: 13, fontWeight: '700', marginBottom: 2 },
+    sheetColors: { flexDirection: 'row', justifyContent: 'center', gap: 14, marginBottom: 6 },
+    sheetColorSwatch: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'transparent' },
+    sheetColorSwatchOn: { borderColor: themeColors.text },
   });
 
   useEffect(() => {
@@ -173,8 +189,6 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
     setView({ name: 'reader', book, chapter, target });
     AsyncStorage.setItem(LAST_KEY, JSON.stringify({ book, chapter })).catch(() => {});
   };
-
-  if (!view) return <View style={styles.container} />;
 
   switch (view.name) {
     case 'chapters':
@@ -221,6 +235,14 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
           onOpen={(book, chapter, verse) => openReader(book, chapter, verse)}
         />
       );
+    case 'favorites':
+      return (
+        <Favorites
+          styles={styles}
+          onBack={() => setView({ name: 'reader', book: pos.book, chapter: pos.chapter })}
+          onOpen={(book, chapter, verse) => openReader(book, chapter, verse)}
+        />
+      );
     default:
       return (
         <Books
@@ -228,13 +250,15 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
           onSearch={() => setView({ name: 'search' })}
           onPick={(book) => setView({ name: 'chapters', book })}
           onBack={() => setView({ name: 'reader', book: pos.book, chapter: pos.chapter })}
+          onFavorites={() => setView({ name: 'favorites' })}
         />
       );
   }
 }
 
 /* ---------- Libros ---------- */
-function Books({ onPick, onSearch, onBack, styles }: { onPick: (b: number) => void; onSearch: () => void; onBack?: () => void; styles: any }) {
+function Books({ onPick, onSearch, onBack, onFavorites, styles }: { onPick: (b: number) => void; onSearch: () => void; onBack?: () => void; onFavorites: () => void; styles: any }) {
+  const themeColors = useTheme();
   const [versionId, setVersionId] = useState('rvr1909'); // versión activa (única disponible por ahora)
   const [pickerOpen, setPickerOpen] = useState(false);
   const [isListView, setIsListView] = useState(false);
@@ -257,11 +281,14 @@ function Books({ onPick, onSearch, onBack, styles }: { onPick: (b: number) => vo
           <Text style={styles.h1}>Biblia</Text>
         </View>
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <Pressable onPress={onFavorites} hitSlop={10}>
+            <Ionicons name="star-outline" size={22} color={themeColors.accent} />
+          </Pressable>
           <Pressable onPress={() => setIsListView(!isListView)} style={styles.versionChip}>
             <Text style={styles.versionText}>{isListView ? '■■' : '⊞⊞'}</Text>
           </Pressable>
-          <Pressable style={styles.versionChip} onPress={() => setPickerOpen(true)}>
-            <Text style={styles.versionText}>{VERSION.abbr}  ▾</Text>
+          <Pressable style={[styles.versionChip, { borderRadius: 6 }]} onPress={() => setPickerOpen(true)}>
+            <Text style={styles.versionText}>{VERSION.abbr}</Text>
           </Pressable>
         </View>
       </View>
@@ -410,8 +437,11 @@ function Reader({
 
   const selVerse =
     selected != null
-      ? { ref: formatRef(book, chapter, selected), text: verses[selected - 1] }
+      ? { ref: formatRef(book, chapter, selected), text: verses[selected - 1], book, chapter, verseNum: selected }
       : null;
+
+  const favorite = useFavorite(book, chapter, selected ?? 0);
+  const { highlights, apply: applyHighlight } = useChapterHighlights(book, chapter);
 
   // Deslizar horizontalmente cambia de capítulo; solo se activa cuando el
   // movimiento es claramente horizontal para no interferir con el scroll vertical.
@@ -436,6 +466,10 @@ function Reader({
   ).current;
   const prevTrailOpacity = swipeX.interpolate({ inputRange: [0, 90], outputRange: [0, 0.9], extrapolate: 'clamp' });
   const nextTrailOpacity = swipeX.interpolate({ inputRange: [-90, 0], outputRange: [0.9, 0], extrapolate: 'clamp' });
+  // Efecto de "página": el contenido acompaña el dedo con resistencia y se
+  // desvanece un poco, como si la hoja se estuviera despegando al deslizar.
+  const contentTranslate = Animated.multiply(swipeX, 0.35);
+  const contentOpacity = swipeX.interpolate({ inputRange: [-150, 0, 150], outputRange: [0.5, 1, 0.5], extrapolate: 'clamp' });
 
   return (
     <View style={styles.container} {...swipe.panHandlers}>
@@ -475,35 +509,46 @@ function Reader({
         onPick={(v) => { setVersionId(v.id); setPickerOpen(false); }}
         onLocked={(v) => (typeof alert === 'function' ? alert(`${v.name} estará disponible con la suscripción. Estamos gestionando la licencia.`) : null)}
       />
-      <ScrollView ref={scrollRef} contentContainerStyle={[styles.readerBody, rStyles.scrollContent]}>
-        <Text style={styles.chapterTitle}>{b.name} {chapter}</Text>
-        {verses.map((v, i) => {
-          const n = i + 1;
-          const active = target === n || selected === n || tapped === n;
-          return (
-            <Pressable
-              key={n}
-              ref={(ref) => { if (ref) verseRefs.current[n] = ref; }}
-              onPress={() => setTapped((prev) => (prev === n ? null : n))}
-              onLongPress={() => setSelected(n)}
-              delayLongPress={280}
-              style={[styles.verseRow, active && styles.verseHighlight]}
-            >
-              <Text style={styles.verse}>
-                <Text style={styles.verseNum}>{n} </Text>
-                {v}
-              </Text>
-            </Pressable>
-          );
-        })}
-        <Text style={styles.readerHint}>Mantén presionado un versículo para conectarlo a un sermón. Desliza a los lados para cambiar de capítulo.</Text>
-        <View style={{ height: 20 }} />
-      </ScrollView>
+      <Animated.View style={{ flex: 1, transform: [{ translateX: contentTranslate }], opacity: contentOpacity }}>
+        <ScrollView ref={scrollRef} contentContainerStyle={[styles.readerBody, rStyles.scrollContent]}>
+          <Text style={styles.chapterTitle}>{b.name} {chapter}</Text>
+          {verses.map((v, i) => {
+            const n = i + 1;
+            const active = target === n || selected === n || tapped === n;
+            const highlightColor = highlights[n];
+            return (
+              <Pressable
+                key={n}
+                ref={(ref) => { if (ref) verseRefs.current[n] = ref; }}
+                onPress={() => setTapped((prev) => (prev === n ? null : n))}
+                onLongPress={() => setSelected(n)}
+                delayLongPress={280}
+                style={[
+                  styles.verseRow,
+                  !!highlightColor && { backgroundColor: highlightColor + '4d', borderRadius: 8 },
+                  active && styles.verseHighlight,
+                ]}
+              >
+                <Text style={styles.verse}>
+                  <Text style={styles.verseNum}>{n} </Text>
+                  {v}
+                </Text>
+              </Pressable>
+            );
+          })}
+          <Text style={styles.readerHint}>Mantén presionado un versículo para conectarlo a un sermón. Desliza a los lados para cambiar de capítulo.</Text>
+          <View style={{ height: 20 }} />
+        </ScrollView>
+      </Animated.View>
 
       <VerseActions
         verse={selVerse}
         sermons={sermons}
         styles={styles}
+        themeColors={themeColors}
+        favorite={favorite}
+        currentColor={selected != null ? highlights[selected] : undefined}
+        onSetColor={(color) => { if (selected != null) applyHighlight(selected, color); }}
         onConnect={(id) => { if (selVerse) onConnectVerse(id, selVerse); setSelected(null); }}
         onClose={() => setSelected(null)}
       />
@@ -516,27 +561,30 @@ function VerseActions({
   verse,
   sermons,
   styles,
+  themeColors,
+  favorite,
+  currentColor,
+  onSetColor,
   onConnect,
   onClose,
 }: {
-  verse: { ref: string; text: string } | null;
+  verse: { ref: string; text: string; book: number; chapter: number; verseNum: number } | null;
   sermons: Sermon[];
   styles: any;
+  themeColors: ThemeColors;
+  favorite: { isFav: boolean; toggle: () => void };
+  currentColor?: string;
+  onSetColor: (color: string | null) => void;
   onConnect: (sermonId: string) => void;
   onClose: () => void;
 }) {
   const [mode, setMode] = useState<'menu' | 'pick'>('menu');
   const [done, setDone] = useState<string | null>(null);
-  const [isFav, setIsFav] = useState(false);
 
   const close = () => { setMode('menu'); setDone(null); onClose(); };
   const copy = async () => {
     if (verse) await Clipboard.setStringAsync(`${verse.text} (${verse.ref})`);
     close();
-  };
-  const toggleFav = async () => {
-    setIsFav(!isFav);
-    // La sincronización con BD ocurre en background (sin bloquear UI)
   };
   const connect = (id: string, title: string) => {
     onConnect(id);
@@ -557,14 +605,31 @@ function VerseActions({
                 <Text style={styles.sheetDone}>✓ Conectado a “{done}”</Text>
               ) : mode === 'menu' ? (
                 <View style={styles.sheetActions}>
+                  <View style={styles.sheetColors}>
+                    {HIGHLIGHT_COLORS.map((c) => (
+                      <Pressable
+                        key={c.value}
+                        onPress={() => onSetColor(currentColor === c.value ? null : c.value)}
+                        style={[
+                          styles.sheetColorSwatch,
+                          { backgroundColor: c.value },
+                          currentColor === c.value && styles.sheetColorSwatchOn,
+                        ]}
+                      >
+                        {currentColor === c.value && <Ionicons name="checkmark" size={16} color="#00000099" />}
+                      </Pressable>
+                    ))}
+                  </View>
                   <Pressable style={styles.sheetBtnPrimary} onPress={() => (sermons.length ? setMode('pick') : null)}>
-                    <Text style={styles.sheetBtnPrimaryText}>🔗  Conectar a un sermón</Text>
+                    <Text style={styles.sheetBtnPrimaryText}>Conectar a un sermón</Text>
                   </Pressable>
-                  <Pressable style={styles.sheetBtn} onPress={toggleFav}>
-                    <Text style={styles.sheetBtnText}>{isFav ? '⭐ ' : '☆ '}Marcar favorito</Text>
+                  <Pressable style={styles.sheetBtn} onPress={favorite.toggle}>
+                    <Ionicons name={favorite.isFav ? 'star' : 'star-outline'} size={18} color={themeColors.text} />
+                    <Text style={styles.sheetBtnText}>Marcar favorito</Text>
                   </Pressable>
                   <Pressable style={styles.sheetBtn} onPress={copy}>
-                    <Text style={styles.sheetBtnText}>📋 Copiar versículo</Text>
+                    <Ionicons name="copy-outline" size={18} color={themeColors.text} />
+                    <Text style={styles.sheetBtnText}>Copiar versículo</Text>
                   </Pressable>
                   <Pressable style={styles.sheetBtn} onPress={close}>
                     <Text style={styles.sheetBtnMuted}>Cancelar</Text>
@@ -776,6 +841,56 @@ function Search({
         {q.trim().length >= 3 && hits.length === 0 && dictionaryResults.length === 0 && !ref && books.length === 0 && (
           <Text style={styles.noResults}>Sin resultados para “{q}”.</Text>
         )}
+      </ScrollView>
+    </View>
+  );
+}
+
+/* ---------- Favoritos ---------- */
+function Favorites({
+  styles,
+  onBack,
+  onOpen,
+}: {
+  styles: any;
+  onBack: () => void;
+  onOpen: (book: number, chapter: number, verse: number) => void;
+}) {
+  const themeColors = useTheme();
+  const [items, setItems] = useState<(FavoriteVerse & { text: string | null }) [] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    getFavorites('rvr1909').then((rows) => {
+      if (!alive) return;
+      setItems(rows.map((r) => ({ ...r, text: getVerseText(r.book, r.chapter, r.verse) })));
+    });
+    return () => { alive = false; };
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.subHead}>
+        <Pressable onPress={onBack} hitSlop={12}><Text style={styles.back}>‹ Biblia</Text></Pressable>
+        <Text style={styles.subTitle}>Favoritos</Text>
+        <View style={{ width: 60 }} />
+      </View>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        {items == null && <Text style={styles.noResults}>Cargando…</Text>}
+        {items != null && items.length === 0 && (
+          <Text style={styles.noResults}>
+            Aún no tienes versículos favoritos. Mantén presionado un versículo y elige “Marcar favorito”.
+          </Text>
+        )}
+        {items?.map((f, k) => (
+          <Pressable key={k} style={[styles.hit, { marginBottom: 10 }]} onPress={() => onOpen(f.book, f.chapter, f.verse)}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="star" size={14} color={themeColors.accent} />
+              <Text style={styles.hitRef}>{formatRef(f.book, f.chapter, f.verse)}</Text>
+            </View>
+            {!!f.text && <Text style={styles.hitText} numberOfLines={2}>{f.text}</Text>}
+          </Pressable>
+        ))}
       </ScrollView>
     </View>
   );

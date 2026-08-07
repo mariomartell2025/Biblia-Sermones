@@ -25,7 +25,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const value: SettingsContextType = {
     ...settings,
-    setLanguage: (lang) => updateAndSave({ language: lang }),
+    setLanguage: (lang) => updateAndSave({ language: lang, languageChosen: true }),
     setTheme: (theme) => updateAndSave({ theme }),
     setFontSize: (size) => updateAndSave({ fontSize: size }),
     setDefaultVersion: (version) => updateAndSave({ defaultVersion: version }),

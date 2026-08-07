@@ -8,7 +8,8 @@ import { Sermon } from './src/types';
 import { theme } from './src/theme';
 import { loadSermons, saveSermons } from './src/storage';
 import { newId } from './src/split';
-import { SettingsProvider } from './src/SettingsContext';
+import { SettingsProvider, useSettings } from './src/SettingsContext';
+import LanguageOnboardingScreen from './src/screens/LanguageOnboardingScreen';
 import ListScreen from './src/screens/ListScreen';
 import DetailScreen from './src/screens/DetailScreen';
 import PreachScreen from './src/screens/PreachScreen';
@@ -129,6 +130,7 @@ export default function App() {
 
   return (
     <SettingsProvider>
+      <LanguageGate>
       <View style={styles.root}>
         <StatusBar style="light" />
         <View style={{ flex: 1 }}>
@@ -162,8 +164,15 @@ export default function App() {
           </View>
         )}
       </View>
+      </LanguageGate>
     </SettingsProvider>
   );
+}
+
+function LanguageGate({ children }: { children: React.ReactNode }) {
+  const settings = useSettings();
+  if (!settings.languageChosen) return <LanguageOnboardingScreen />;
+  return <>{children}</>;
 }
 
 function TabButton({ label, icon, active, onPress }: { label: string; icon: string; active: boolean; onPress: () => void }) {

@@ -53,6 +53,16 @@ export async function initBibleDb(): Promise<boolean> {
         readAt INTEGER NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_hist ON reading_history(readAt DESC);
+
+      CREATE TABLE IF NOT EXISTS verse_highlights (
+        version TEXT NOT NULL,
+        book INTEGER NOT NULL,
+        chapter INTEGER NOT NULL,
+        verse INTEGER NOT NULL,
+        color TEXT NOT NULL,
+        createdAt INTEGER NOT NULL,
+        PRIMARY KEY (version, book, chapter, verse)
+      );
     `);
 
     // ¿Ya está sembrada la RV1909?
@@ -62,11 +72,13 @@ export async function initBibleDb(): Promise<boolean> {
     if (!row || row.n === 0) {
       await seedVersion('rvr1909');
     }
-    // Inicializar módulos de favoritos e historial
+    // Inicializar módulos de favoritos, historial y resaltados
     const { initFavDb } = await import('./favorites');
     const { initHistoryDb } = await import('./history');
+    const { initHighlightsDb } = await import('./highlights');
     await initFavDb(db);
     await initHistoryDb(db);
+    await initHighlightsDb(db);
 
     ready = true;
     console.log('SQLite Biblia lista (rvr1909 sembrada)');

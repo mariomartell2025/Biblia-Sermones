@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from
 import * as Updates from 'expo-updates';
 import { useTheme } from '../useTheme';
 import { useSettings } from '../SettingsContext';
-import { t, Theme, Language } from '../settings';
+import { t, Theme } from '../settings';
 
 export default function SettingsScreen() {
   const settings = useSettings();
@@ -12,7 +12,6 @@ export default function SettingsScreen() {
   const [updating, setUpdating] = useState(false);
 
   const themeOptions: Theme[] = ['light', 'dark', 'sepia'];
-  const languageOptions: Language[] = ['es', 'en'];
 
   const checkForUpdates = async () => {
     try {
@@ -76,28 +75,9 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>⚙️  {t('ajustes', lang)}</Text>
-        <Text style={{ color: themeColors.textMuted, fontSize: 11, marginTop: 2 }}>Actualizado vía OTA ✓</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
-        {/* Idioma */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('idioma', lang)}</Text>
-          <View style={styles.optionRow}>
-            {languageOptions.map((l) => (
-              <Pressable
-                key={l}
-                style={[styles.optionBtn, settings.language === l && styles.optionBtnActive]}
-                onPress={() => settings.setLanguage(l)}
-              >
-                <Text style={[styles.optionText, settings.language === l && styles.optionTextActive]}>
-                  {l === 'es' ? t('español', l) : t('ingles', l)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-
         {/* Tema */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('tema', lang)}</Text>
@@ -162,6 +142,9 @@ export default function SettingsScreen() {
           <Text style={styles.infoText}>Biblia + Sermones v1.0</Text>
           <Text style={styles.infoSubtext}>Offline. Libre. Para predicadores.</Text>
         </View>
+        <Text style={{ color: themeColors.textMuted, fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+          Actualizado vía OTA ✓
+        </Text>
       </ScrollView>
     </View>
   );
