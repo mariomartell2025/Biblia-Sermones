@@ -9,6 +9,9 @@ export interface AppSettings {
   theme: Theme;
   fontSize: number; // 14-30
   defaultVersion: string;
+  // Deja lista la app para una futura versión PRO de pago único que quite los
+  // anuncios (aún no existe flujo de compra real conectado a esto).
+  isPro: boolean;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -17,6 +20,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   theme: 'dark',
   fontSize: 17,
   defaultVersion: 'rvr1909',
+  isPro: false,
 };
 
 const STORAGE_KEY = 'app:settings';

@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { Sermon } from '../types';
 import { theme } from '../theme';
 import MinisterManualScreen from './MinisterManualScreen';
+import BannerAdSlot from '../ads/BannerAdSlot';
 
 type Props = {
   sermons: Sermon[];
@@ -54,6 +55,7 @@ export default function ListScreen({ sermons, onOpen, onNew }: Props) {
         ListEmptyComponent={
           <Text style={styles.empty}>Aún no tienes sermones. Toca “+ Nuevo”.</Text>
         }
+        ListFooterComponent={sermons.length > 0 ? <BannerAdSlot /> : null}
         renderItem={({ item }) => (
           <Pressable style={styles.card} onPress={() => onOpen(item.id)}>
             <View style={styles.thumb}>

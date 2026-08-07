@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import mobileAds from 'react-native-google-mobile-ads';
 
 import { initBibleDb } from './src/bible/db';
 import { Sermon } from './src/types';
@@ -42,6 +43,7 @@ export default function App() {
   useEffect(() => {
     loadSermons().then(setSermons);
   }, []);
+  useEffect(() => { mobileAds().initialize(); }, []);
 
   // Botón/gesto de retroceso de Android: navega dentro de la app en vez de
   // cerrarla de inmediato. En la raíz de una pestaña, pide un segundo toque

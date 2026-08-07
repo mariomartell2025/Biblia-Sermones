@@ -39,6 +39,7 @@ import { chapterOf, searchOf, verseOf } from '../bible/query';
 import { useFavorite, useLogChapterRead, useChapterHighlights } from '../bible/useBible';
 import { searchDictionary } from '../bible/dictionary';
 import { VERSIONS } from '../bible/versions';
+import { useOccasionalInterstitial } from '../ads/useOccasionalInterstitial';
 import { theme } from '../theme';
 
 // Enlace de descarga que se adjunta al compartir. Es el canal de distribución
@@ -65,6 +66,7 @@ const DEFAULT_POS = { book: 42, chapter: 1 }; // Juan 1 la primera vez
 export default function BibleModule({ sermons, onConnectVerse, onSettings }: { sermons: Sermon[]; onConnectVerse: ConnectFn; onSettings?: () => void }) {
   const themeColors = useTheme();
   const settings = useSettings();
+  const interstitial = useOccasionalInterstitial();
 
   // Arranca en el lector, en la última posición leída (o Juan 1 la 1a vez).
   const [view, setView] = useState<View>({ name: 'reader', ...DEFAULT_POS });
@@ -226,6 +228,7 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
     setPos({ book, chapter });
     setView({ name: 'reader', book, chapter, target });
     AsyncStorage.setItem(LAST_KEY, JSON.stringify({ book, chapter })).catch(() => {});
+    interstitial.trigger();
   };
 
   switch (view.name) {
