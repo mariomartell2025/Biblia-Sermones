@@ -5,6 +5,9 @@ export interface DictionaryEntry {
     es: string;
     en: string;
   };
+  // Para palabras compuestas de varias raíces (frecuente en hebreo bíblico),
+  // desglosa cada parte y su significado individual.
+  breakdown?: { es: string; en: string };
 }
 
 export const BIBLE_DICTIONARY: DictionaryEntry[] = [
@@ -147,7 +150,11 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
     definition: {
       es: 'Casa del pan. Pequeño pueblo en Judea donde nació Jesucristo. Sitio histórico y religioso significativo.',
       en: 'House of bread. Small town in Judea where Jesus Christ was born. Significant historical and religious site.',
-    }
+    },
+    breakdown: {
+      es: 'Palabra compuesta: "beit" (casa, morada) + "léjem" (pan, alimento) → "casa del pan". Un nombre profético para el lugar donde nació el Pan de Vida (Juan 6:35).',
+      en: 'Compound word: "beit" (house, dwelling) + "lechem" (bread, food) → "house of bread". A prophetic name for the place where the Bread of Life was born (John 6:35).',
+    },
   },
   {
     word: 'Espíritu Santo',
@@ -258,7 +265,23 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
     definition: {
       es: 'Alaben a Yah. Del hebreo "Hallelu-Yah", una exclamación de alabanza dirigida a Dios.',
       en: 'Praise Yah. From the Hebrew "Hallelu-Yah", an exclamation of praise directed to God.',
-    }
+    },
+    breakdown: {
+      es: 'Palabra compuesta: "hallelu" (alaben, forma imperativa plural) + "Yah" (forma corta del nombre divino YHWH) → "alaben a Yah". Aparece al inicio o final de varios Salmos.',
+      en: 'Compound word: "hallelu" (praise, plural imperative) + "Yah" (short form of the divine name YHWH) → "praise Yah". Appears at the start or end of several Psalms.',
+    },
+  },
+  {
+    word: 'Emanuel',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Dios con nosotros. Nombre profético del Mesías anunciado en Isaías 7:14 y cumplido en el nacimiento de Jesús (Mateo 1:23).',
+      en: 'God with us. Prophetic name of the Messiah announced in Isaiah 7:14 and fulfilled in the birth of Jesus (Matthew 1:23).',
+    },
+    breakdown: {
+      es: 'Palabra compuesta de tres partes: "im" (con) + "anu" (nosotros) + "El" (Dios) → "Dios con nosotros". Una de las palabras compuestas más conocidas de la profecía bíblica.',
+      en: 'Compound word made of three parts: "im" (with) + "anu" (us) + "El" (God) → "God with us". One of the best-known compound words in biblical prophecy.',
+    },
   },
   {
     word: 'Amén',

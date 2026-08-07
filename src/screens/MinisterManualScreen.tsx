@@ -10,7 +10,6 @@ const CEREMONIES = {
   boda: {
     es: 'Matrimonio',
     en: 'Wedding',
-    icon: '💒',
     content: {
       es: `CEREMONIA DE MATRIMONIO
 
@@ -157,7 +156,6 @@ your prayers, your love and your support on the journey they begin today."`,
   cena: {
     es: 'Santa Cena',
     en: 'Communion',
-    icon: '🍷',
     content: {
       es: `ADMINISTRACIÓN DE LA SANTA CENA
 
@@ -238,7 +236,6 @@ CONCLUSION
   bautismo: {
     es: 'Bautismo',
     en: 'Baptism',
-    icon: '💧',
     content: {
       es: `ADMINISTRACIÓN DEL BAUTISMO
 
@@ -380,7 +377,6 @@ In the name of Jesus Christ, amen."`,
   funeral: {
     es: 'Funeral',
     en: 'Funeral',
-    icon: '🕊️',
     content: {
       es: `CEREMONIA FÚNEBRE - SERVICIO DE DESPEDIDA
 
@@ -517,7 +513,6 @@ May his/her memory inspire us to be ready to meet our Lord."`,
   oracion: {
     es: 'Oración Pública',
     en: 'Public Prayer',
-    icon: '🙏',
     content: {
       es: `DIRECCIÓN DE ORACIÓN PÚBLICA EN LA CONGREGACIÓN
 
@@ -713,7 +708,6 @@ MISTAKES TO AVOID
   presentacion: {
     es: 'Presentación de Niños',
     en: 'Child Dedication',
-    icon: '👶',
     content: {
       es: `CEREMONIA DE PRESENTACIÓN DE NIÑOS ANTE DIOS
 
@@ -955,10 +949,10 @@ export default function MinisterManualScreen() {
   const themeColors = useTheme();
   const settings = useSettings();
   const lang = settings.language as 'es' | 'en';
-  const [selected, setSelected] = useState<Ceremony>('boda');
+  const [selected, setSelected] = useState<Ceremony | null>(null);
 
-  const ceremony = CEREMONIES[selected];
-  const content = ceremony.content[lang];
+  const ceremony = selected ? CEREMONIES[selected] : null;
+  const content = ceremony ? ceremony.content[lang] : '';
 
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: themeColors.bg },
@@ -969,31 +963,37 @@ export default function MinisterManualScreen() {
       paddingHorizontal: 20,
     },
     headerTitle: { color: themeColors.text, fontSize: 20, fontWeight: '800' },
-    tabs: {
+    listItem: {
       flexDirection: 'row',
-      backgroundColor: themeColors.bgElevated,
-      paddingVertical: 12,
-      paddingHorizontal: 12,
-      gap: 8,
-      borderBottomWidth: 1,
-      borderBottomColor: themeColors.cardBorder,
-    },
-    tab: {
-      flex: 1,
-      paddingVertical: 10,
-      paddingHorizontal: 8,
-      borderRadius: 8,
       alignItems: 'center',
       backgroundColor: themeColors.card,
       borderWidth: 1,
       borderColor: themeColors.cardBorder,
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      marginHorizontal: 16,
+      marginBottom: 10,
+      gap: 14,
     },
-    tabActive: {
-      backgroundColor: themeColors.accent,
-      borderColor: themeColors.accent,
+    listIconWrap: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: themeColors.bgElevated,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    tabText: { color: themeColors.text, fontSize: 11, fontWeight: '600', textAlign: 'center' },
-    tabTextActive: { color: themeColors.accentText, fontWeight: '800' },
+    listLabel: { color: themeColors.text, fontSize: 16, fontWeight: '700', flex: 1 },
+    backRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 14,
+      paddingBottom: 6,
+      gap: 6,
+    },
+    backText: { color: themeColors.accent, fontSize: 16, fontWeight: '700' },
     content: { flex: 1, padding: 20, paddingBottom: 40 },
     ceremonyTitle: { color: themeColors.text, fontSize: 24, fontWeight: '800', marginBottom: 16, textAlign: 'center' },
     sectionHeader: {
@@ -1044,31 +1044,37 @@ export default function MinisterManualScreen() {
     { key: 'oracion', label: lang === 'es' ? 'Oración' : 'Prayer', iconName: 'flame' },
   ];
 
+  if (!selected || !ceremony) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>{lang === 'es' ? 'Manual del Ministro' : "Minister's Manual"}</Text>
+        </View>
+        <ScrollView contentContainerStyle={{ paddingVertical: 12 }}>
+          {ceremoniesList.map((item) => (
+            <Pressable key={item.key} style={styles.listItem} onPress={() => setSelected(item.key)}>
+              <View style={styles.listIconWrap}>
+                <Ionicons name={item.iconName} size={18} color={themeColors.accent} />
+              </View>
+              <Text style={styles.listLabel}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={18} color={themeColors.textMuted} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{lang === 'es' ? 'Manual del Ministro' : "Minister's Manual"}</Text>
       </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabs}>
-        {ceremoniesList.map((item) => (
-          <Pressable
-            key={item.key}
-            style={[styles.tab, selected === item.key && styles.tabActive]}
-            onPress={() => setSelected(item.key)}
-          >
-            <Ionicons name={item.iconName} size={20} color={selected === item.key ? themeColors.accentText : themeColors.text} style={{ marginBottom: 4 }} />
-            <Text style={[styles.tabText, selected === item.key && styles.tabTextActive]}>
-              {item.label}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-
+      <Pressable style={styles.backRow} onPress={() => setSelected(null)}>
+        <Ionicons name="chevron-back" size={20} color={themeColors.accent} />
+        <Text style={styles.backText}>{lang === 'es' ? 'Ceremonias' : 'Ceremonies'}</Text>
+      </Pressable>
       <ScrollView style={styles.content}>
-        <View style={{ alignItems: 'center', marginBottom: 8 }}>
-          <Ionicons name={ceremoniesList.find(c => c.key === selected)?.iconName || 'book'} size={40} color={themeColors.accent} />
-        </View>
         <Text style={styles.ceremonyTitle}>{ceremony[lang]}</Text>
         <LiturgyContent content={content} styles={styles} />
       </ScrollView>

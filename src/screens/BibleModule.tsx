@@ -7,8 +7,10 @@ import {
   FlatList,
   TextInput,
   StyleSheet,
+  PanResponder,
 } from 'react-native';
 import { Modal } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import { useTheme } from '../useTheme';
@@ -358,6 +360,7 @@ function Reader({
   onSettings?: () => void;
   onChange: (book: number, chapter: number) => void;
 }) {
+  const themeColors = useTheme();
   const b = BOOKS[book];
   const responsive = useResponsive();
   const rStyles = responsiveStyles(responsive);
@@ -392,6 +395,9 @@ function Reader({
     setSelected(null);
   }, [book, chapter]);
 
+  const [versionId, setVersionId] = useState('rvr1909');
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   const prev = () => {
     if (chapter > 1) onChange(book, chapter - 1);
     else if (book > 0) onChange(book - 1, BOOKS[book - 1].chapters);
@@ -406,15 +412,44 @@ function Reader({
       ? { ref: formatRef(book, chapter, selected), text: verses[selected - 1] }
       : null;
 
+  // Deslizar horizontalmente cambia de capítulo; solo se activa cuando el
+  // movimiento es claramente horizontal para no interferir con el scroll vertical.
+  // navRef evita que el PanResponder (creado una sola vez) quede con next/prev
+  // obsoletos de un capítulo anterior.
+  const navRef = useRef({ next, prev });
+  useEffect(() => { navRef.current = { next, prev }; });
+  const swipe = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 24 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
+      onPanResponderRelease: (_, g) => {
+        if (g.dx < -60) navRef.current.next();
+        else if (g.dx > 60) navRef.current.prev();
+      },
+    })
+  ).current;
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...swipe.panHandlers}>
       <View style={styles.subHead}>
-        <Pressable onPress={onBooks} hitSlop={12}><Text style={styles.back}>☰ Libros</Text></Pressable>
-        <Pressable onPress={onChapters} hitSlop={12}><Text style={styles.subTitle}>{b.name} {chapter}  ▾</Text></Pressable>
+        <Pressable onPress={onBooks} hitSlop={12} style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons name="chevron-back" size={22} color={themeColors.accent} />
+          <Text style={[styles.back, { fontSize: 17 }]}>Libros</Text>
+        </Pressable>
+        <Pressable onPress={onChapters} hitSlop={12}><Text style={styles.subTitle}>{b.name} {chapter}</Text></Pressable>
+        <Pressable style={styles.versionChip} onPress={() => setPickerOpen(true)}>
+          <Text style={styles.versionText}>{VERSION.abbr}</Text>
+        </Pressable>
         <View style={{ flex: 1 }} />
-        <Pressable onPress={onSearch} hitSlop={12}><Text style={styles.searchIconBtn}>🔍</Text></Pressable>
-        <Pressable onPress={onSettings} hitSlop={12}><Text style={[styles.searchIconBtn, { marginLeft: 12 }]}>⚙️</Text></Pressable>
+        <Pressable onPress={onSearch} hitSlop={12}><Ionicons name="search" size={20} color={themeColors.accent} /></Pressable>
+        <Pressable onPress={onSettings} hitSlop={12} style={{ marginLeft: 12 }}><Ionicons name="settings-outline" size={20} color={themeColors.accent} /></Pressable>
       </View>
+      <VersionPicker
+        visible={pickerOpen}
+        currentId={versionId}
+        onClose={() => setPickerOpen(false)}
+        onPick={(v) => { setVersionId(v.id); setPickerOpen(false); }}
+        onLocked={(v) => (typeof alert === 'function' ? alert(`${v.name} estará disponible con la suscripción. Estamos gestionando la licencia.`) : null)}
+      />
       <ScrollView ref={scrollRef} contentContainerStyle={[styles.readerBody, rStyles.scrollContent]}>
         <Text style={styles.chapterTitle}>{b.name} {chapter}</Text>
         {verses.map((v, i) => {
@@ -436,16 +471,9 @@ function Reader({
             </Pressable>
           );
         })}
-        <Text style={styles.readerHint}>Mantén presionado un versículo para conectarlo a un sermón.</Text>
+        <Text style={styles.readerHint}>Mantén presionado un versículo para conectarlo a un sermón. Desliza a los lados para cambiar de capítulo.</Text>
         <View style={{ height: 20 }} />
       </ScrollView>
-      {/* Flechas flotantes para navegar */}
-      <Pressable onPress={prev} style={{ position: 'absolute', left: 16, top: '50%', zIndex: 10 }}>
-        <Text style={[styles.navText, { fontSize: 48, marginTop: -24 }]}>‹</Text>
-      </Pressable>
-      <Pressable onPress={next} style={{ position: 'absolute', right: 16, top: '50%', zIndex: 10 }}>
-        <Text style={[styles.navText, { fontSize: 48, marginTop: -24 }]}>›</Text>
-      </Pressable>
 
       <VerseActions
         verse={selVerse}
@@ -616,6 +644,7 @@ function Search({
   const preview = ref && ref.verse ? getVerseText(ref.book, ref.chapter, ref.verse) : null;
   const [hits, setHits] = useState<VerseHit[]>([]);
   const dictionaryResults = useMemo(() => (q.trim().length >= 3 ? searchDictionary(q, lang) : []), [q, lang]);
+  const [expandedWord, setExpandedWord] = useState<string | null>(null);
 
   useEffect(() => {
     if (q.trim().length < 3) { setHits([]); return; }
@@ -666,22 +695,48 @@ function Search({
         {/* Resultados del diccionario */}
         {dictionaryResults.length > 0 && (
           <View style={{ marginBottom: 16 }}>
-            <Text style={[styles.sectionHeader, { paddingLeft: 0, marginBottom: 12 }]}>
-              📖 {lang === 'es' ? 'Palabras Bíblicas' : 'Biblical Words'}
-            </Text>
-            {dictionaryResults.map((entry, k) => (
-              <View key={k} style={[styles.hit, { marginBottom: 12 }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Text style={styles.hitRef}>{entry.word}</Text>
-                  {!!entry.origin && (
-                    <View style={{ backgroundColor: themeColors.bgElevated, borderWidth: 1, borderColor: themeColors.cardBorder, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 }}>
-                      <Text style={{ color: themeColors.accent, fontSize: 10, fontWeight: '800' }}>{entry.origin[lang]}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+              <Ionicons name="book-outline" size={14} color={themeColors.textMuted} />
+              <Text style={[styles.sectionHeader, { paddingLeft: 0, marginBottom: 0 }]}>
+                {lang === 'es' ? 'Palabras Bíblicas' : 'Biblical Words'}
+              </Text>
+            </View>
+            {dictionaryResults.map((entry, k) => {
+              const isExpanded = expandedWord === entry.word;
+              return (
+                <Pressable
+                  key={k}
+                  style={[styles.hit, { marginBottom: 12 }]}
+                  onPress={() => setExpandedWord(isExpanded ? null : entry.word)}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={styles.hitRef}>{entry.word}</Text>
+                    {!!entry.origin && (
+                      <View style={{ backgroundColor: themeColors.bgElevated, borderWidth: 1, borderColor: themeColors.cardBorder, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 }}>
+                        <Text style={{ color: themeColors.accent, fontSize: 10, fontWeight: '800' }}>{entry.origin[lang]}</Text>
+                      </View>
+                    )}
+                    {!!entry.breakdown && (
+                      <Ionicons
+                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                        size={14}
+                        color={themeColors.textMuted}
+                        style={{ marginLeft: 'auto' }}
+                      />
+                    )}
+                  </View>
+                  <Text style={styles.hitText}>{entry.definition[lang]}</Text>
+                  {isExpanded && !!entry.breakdown && (
+                    <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: themeColors.cardBorder }}>
+                      <Text style={{ color: themeColors.accent, fontSize: 11, fontWeight: '800', marginBottom: 4 }}>
+                        {lang === 'es' ? 'PALABRA COMPUESTA' : 'COMPOUND WORD'}
+                      </Text>
+                      <Text style={[styles.hitText, { fontStyle: 'italic' }]}>{entry.breakdown[lang]}</Text>
                     </View>
                   )}
-                </View>
-                <Text style={styles.hitText}>{entry.definition[lang]}</Text>
-              </View>
-            ))}
+                </Pressable>
+              );
+            })}
           </View>
         )}
 
