@@ -249,16 +249,16 @@ function Books({ onPick, onSearch, onBack, styles }: { onPick: (b: number) => vo
   return (
     <View style={styles.container}>
       <View style={styles.head}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flex: 1 }}>
           {onBack && <Pressable onPress={onBack} hitSlop={12}><Text style={styles.back}>‹</Text></Pressable>}
-          <Text style={styles.h1}>Biblia</Text>
+          <Text style={[styles.h1, { fontSize: 32 }]}>Libros</Text>
         </View>
-        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Pressable onPress={() => setIsListView(!isListView)} style={styles.versionChip}>
-            <Text style={styles.versionText}>{isListView ? '■■' : '⊞⊞'}</Text>
+            <Text style={styles.versionText}>{isListView ? '☰' : '⊞'}</Text>
           </Pressable>
           <Pressable style={styles.versionChip} onPress={() => setPickerOpen(true)}>
-            <Text style={styles.versionText}>{VERSION.abbr}  ▾</Text>
+            <Text style={styles.versionText}>{VERSION.abbr}</Text>
           </Pressable>
         </View>
       </View>
@@ -270,7 +270,7 @@ function Books({ onPick, onSearch, onBack, styles }: { onPick: (b: number) => vo
         onLocked={(v) => notify(`${v.name} estará disponible con la suscripción. Estamos gestionando la licencia.`)}
       />
       <Pressable style={styles.searchBar} onPress={onSearch}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Ionicons name="search" size={16} color={themeColors.textMuted} />
         <Text style={styles.searchPlaceholder}>Buscar versículo o referencia (Juan 3:16)</Text>
       </Pressable>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
@@ -372,9 +372,9 @@ function Reader({
     if (target && scrollRef.current && verseRefs.current[target]) {
       setTimeout(() => {
         verseRefs.current[target]?.measure((x, y, width, height, pageX, pageY) => {
-          scrollRef.current?.scrollTo({ y: pageY - 100, animated: true });
+          scrollRef.current?.scrollTo({ y: Math.max(0, pageY - 80), animated: true });
         });
-      }, 150);
+      }, 200);
     }
   }, [target]);
 
@@ -400,23 +400,22 @@ function Reader({
   return (
     <View style={styles.container}>
       <View style={styles.subHead}>
-        <Pressable onPress={onBooks} hitSlop={12}><Text style={styles.back}>☰ Libros</Text></Pressable>
-        <Pressable onPress={onChapters} hitSlop={12}><Text style={styles.subTitle}>{b.name} {chapter}  ▾</Text></Pressable>
+        <Pressable onPress={onBooks} hitSlop={12}><Text style={styles.back}>‹ Libros</Text></Pressable>
+        <Pressable onPress={onChapters} hitSlop={12}><Text style={styles.subTitle}>{b.name} {chapter}</Text></Pressable>
         <View style={{ flex: 1 }} />
-        <Pressable onPress={onSearch} hitSlop={12}><Text style={styles.searchIconBtn}>🔍</Text></Pressable>
-        <Pressable onPress={onSettings} hitSlop={12}><Text style={[styles.searchIconBtn, { marginLeft: 12 }]}>⚙️</Text></Pressable>
+        <Pressable onPress={onSearch} hitSlop={12}><Ionicons name="search" size={20} color={themeColors.accent} /></Pressable>
+        <Pressable onPress={onSettings} hitSlop={12}><Ionicons name="settings" size={20} color={themeColors.accent} style={{ marginLeft: 12 }} /></Pressable>
       </View>
       <ScrollView ref={scrollRef} contentContainerStyle={[styles.readerBody, rStyles.scrollContent]}>
         <Text style={styles.chapterTitle}>{b.name} {chapter}</Text>
         {verses.map((v, i) => {
           const n = i + 1;
-          const active = target === n || selected === n;
+          const active = selected === n;
           return (
             <Pressable
               key={n}
               ref={(ref) => { if (ref) verseRefs.current[n] = ref; }}
-              onLongPress={() => setSelected(n)}
-              delayLongPress={280}
+              onPress={() => setSelected(n)}
               style={[styles.verseRow, active && styles.verseHighlight]}
             >
               <Text style={styles.verse}>

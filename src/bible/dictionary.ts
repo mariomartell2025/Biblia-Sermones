@@ -112,6 +112,90 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
       en: 'Undeserved favor. God\'s free gift of salvation not dependent on human works. Love without merit.',
     }
   },
+  {
+    word: 'Yaweh',
+    definition: {
+      es: 'Nombre divino sagrado, frecuentemente traducido como SEÑOR. Significa "El que es" o existencia eterna.',
+      en: 'Sacred divine name, frequently translated as LORD. Means "He who is" or eternal existence.',
+    }
+  },
+  {
+    word: 'Shadai',
+    definition: {
+      es: 'Dios Todopoderoso. Nombre hebreo que significa "El que es suficiente" o "Dios Fuerte y Poderoso".',
+      en: 'God Almighty. Hebrew name meaning "The One who is sufficient" or "Strong and Mighty God".',
+    }
+  },
+  {
+    word: 'Belén',
+    definition: {
+      es: 'Casa del pan. Pequeño pueblo en Judea donde nació Jesucristo. Sitio histórico y religioso significativo.',
+      en: 'House of bread. Small town in Judea where Jesus Christ was born. Significant historical and religious site.',
+    }
+  },
+  {
+    word: 'Espíritu Santo',
+    definition: {
+      es: 'Tercera persona de la Trinidad. Agente divino de santificación, consuelo y poder en la vida cristiana.',
+      en: 'Third person of the Trinity. Divine agent of sanctification, comfort and power in Christian life.',
+    }
+  },
+  {
+    word: 'Trinidad',
+    definition: {
+      es: 'Doctrina cristiana de que Dios existe como tres personas: Padre, Hijo y Espíritu Santo, en una sola esencia.',
+      en: 'Christian doctrine that God exists as three persons: Father, Son and Holy Spirit, in one essence.',
+    }
+  },
+  {
+    word: 'Redención',
+    definition: {
+      es: 'Acción de rescatar o liberar. Salvación a través de la muerte y resurrección de Jesucristo.',
+      en: 'Action of rescuing or liberating. Salvation through the death and resurrection of Jesus Christ.',
+    }
+  },
+  {
+    word: 'Justificación',
+    definition: {
+      es: 'Acto de Dios por el cual declara justo al pecador mediante la fe en Cristo. Imputación de justicia divina.',
+      en: 'Act of God by which He declares the sinner righteous through faith in Christ. Imputation of divine justice.',
+    }
+  },
+  {
+    word: 'Santificación',
+    definition: {
+      es: 'Proceso continuo de ser apartado para Dios y hacerse cada vez más como Cristo en carácter y conducta.',
+      en: 'Continuous process of being set apart for God and becoming increasingly like Christ in character and conduct.',
+    }
+  },
+  {
+    word: 'Resurrección',
+    definition: {
+      es: 'Levantamiento de los muertos. Especialmente la resurrección de Jesucristo al tercer día después de su muerte.',
+      en: 'Rising from the dead. Especially the resurrection of Jesus Christ on the third day after his death.',
+    }
+  },
+  {
+    word: 'Arrepentimiento',
+    definition: {
+      es: 'Cambio de mente y vuelta del pecado. Rechazo del pecado y regreso a Dios en obediencia.',
+      en: 'Change of mind and turning from sin. Rejection of sin and return to God in obedience.',
+    }
+  },
+  {
+    word: 'Pecado',
+    definition: {
+      es: 'Transgresión de la ley de Dios. Acto, pensamiento o naturaleza que viola la voluntad y santidad divina.',
+      en: 'Transgression of God\'s law. Act, thought or nature that violates divine will and holiness.',
+    }
+  },
+  {
+    word: 'Perdón',
+    definition: {
+      es: 'Remisión de castigo merecido. Acto de Dios de liberar al culpable de la culpa y condenación del pecado.',
+      en: 'Remission of deserved punishment. Act of God to free the guilty from guilt and condemnation of sin.',
+    }
+  },
 ];
 
 export function searchDictionary(query: string, language: 'es' | 'en' = 'es'): DictionaryEntry[] {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as Updates from 'expo-updates';
 import { useTheme } from '../useTheme';
 import { useSettings } from '../SettingsContext';
@@ -76,7 +77,10 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>⚙️  {t('ajustes', lang)}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Ionicons name="settings" size={28} color={themeColors.text} />
+          <Text style={styles.headerTitle}>{t('ajustes', lang)}</Text>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
@@ -109,7 +113,11 @@ export default function SettingsScreen() {
                 onPress={() => settings.setTheme(th)}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: 16 }}>{th === 'light' ? '☀️' : th === 'dark' ? '🌙' : '📖'}</Text>
+                  <Ionicons
+                    name={th === 'light' ? 'sunny' : th === 'dark' ? 'moon' : 'layers'}
+                    size={18}
+                    color={settings.theme === th ? themeColors.accentText : themeColors.text}
+                  />
                   <Text style={[styles.optionText, settings.theme === th && styles.optionTextActive, { marginTop: 0 }]}>
                     {t(th as any, lang)}
                   </Text>
@@ -139,7 +147,7 @@ export default function SettingsScreen() {
             <Pressable
               style={[styles.optionBtn, { flex: 0, width: 50 }]}
               onPress={() => {
-                const newSize = Math.min(20, fontSize + 1);
+                const newSize = Math.min(30, fontSize + 1);
                 setFontSize(newSize);
                 settings.setFontSize(newSize);
               }}
@@ -161,7 +169,10 @@ export default function SettingsScreen() {
           {updating ? (
             <ActivityIndicator color={themeColors.accentText} />
           ) : (
-            <Text style={styles.updateBtnText}>🔄 Actualizar App</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <Ionicons name="refresh" size={18} color={themeColors.accentText} />
+              <Text style={styles.updateBtnText}>{lang === 'es' ? 'Actualizar App' : 'Update App'}</Text>
+            </View>
           )}
         </Pressable>
 

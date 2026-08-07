@@ -15,6 +15,7 @@ import PreachScreen from './src/screens/PreachScreen';
 import EditScreen from './src/screens/EditScreen';
 import BibleModule from './src/screens/BibleModule';
 import DevocionalScreen from './src/screens/DevocionalScreen';
+import MinisterManualScreen from './src/screens/MinisterManualScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 
 type Screen =
@@ -23,7 +24,7 @@ type Screen =
   | { name: 'preach'; id: string }
   | { name: 'edit'; id: string };
 
-type Tab = 'biblia' | 'devocional' | 'sermones' | 'ajustes';
+type Tab = 'biblia' | 'devocional' | 'sermones' | 'manual' | 'ajustes';
 
 function emptySermon(): Sermon {
   const now = Date.now();
@@ -139,6 +140,8 @@ export default function App() {
             renderSermones()
           ) : tab === 'devocional' ? (
             <DevocionalScreen />
+          ) : tab === 'manual' ? (
+            <MinisterManualScreen />
           ) : tab === 'ajustes' ? (
             <SettingsScreen />
           ) : (
@@ -155,9 +158,8 @@ export default function App() {
               active={tab === 'sermones'}
               onPress={() => { setTab('sermones'); setScreen({ name: 'list' }); }}
             />
-            <Pressable style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} onPress={openBibleVersions} hitSlop={12}>
-              <Ionicons name="list" size={23} color={theme.textMuted} />
-              <Text style={[styles.tabLabel, { marginTop: 4 }]}>Versiones</Text>
+            <Pressable style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} onPress={() => setTab('manual')} hitSlop={12}>
+              <Text style={[styles.tabLabel, tab === 'manual' && styles.tabLabelActive]}>Manual del Ministro</Text>
             </Pressable>
             <TabButton label="Biblia" icon="book" active={tab === 'biblia'} onPress={() => setTab('biblia')} />
           </View>
