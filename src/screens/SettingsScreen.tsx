@@ -76,6 +76,7 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>⚙️  {t('ajustes', lang)}</Text>
+        <Text style={{ color: themeColors.textMuted, fontSize: 11, marginTop: 2 }}>Actualizado vía OTA ✓</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
