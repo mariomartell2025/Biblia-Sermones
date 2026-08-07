@@ -272,6 +272,110 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
     },
   },
   {
+    word: 'Yeshua',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Forma hebrea del nombre de Jesús. Significa "salvación" o "él salva", de la raíz "yasha" (salvar, liberar).',
+      en: 'Hebrew form of the name Jesus. Means "salvation" or "he saves", from the root "yasha" (to save, deliver).',
+    },
+  },
+  {
+    word: 'Adonai',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Mi Señor. Título hebreo de majestad para Dios, usado tradicionalmente al leer en voz alta el nombre sagrado YHWH.',
+      en: 'My Lord. Hebrew title of majesty for God, traditionally used when reading the sacred name YHWH aloud.',
+    },
+  },
+  {
+    word: 'Abba',
+    origin: { es: 'Arameo', en: 'Aramaic' },
+    definition: {
+      es: 'Padre. Término arameo íntimo y familiar, usado por Jesús en Getsemaní (Marcos 14:36) y por los creyentes (Romanos 8:15).',
+      en: 'Father. Intimate, familial Aramaic term, used by Jesus in Gethsemane (Mark 14:36) and by believers (Romans 8:15).',
+    },
+  },
+  {
+    word: 'Néfesh',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Alma o ser viviente. Palabra hebrea que designa a la persona completa, no solo una parte inmaterial.',
+      en: 'Soul or living being. Hebrew word designating the whole living person, not just an immaterial part.',
+    },
+  },
+  {
+    word: 'Berit',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Pacto. Palabra hebrea para un acuerdo solemne y vinculante, central en la relación de Dios con su pueblo.',
+      en: 'Covenant. Hebrew word for a solemn, binding agreement, central to God\'s relationship with his people.',
+    },
+  },
+  {
+    word: 'Shekiná',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Presencia manifiesta de Dios habitando entre su pueblo. Del hebreo "shakán" (habitar, morar).',
+      en: 'The manifest presence of God dwelling among his people. From the Hebrew "shakan" (to dwell).',
+    },
+  },
+  {
+    word: 'Kairos',
+    origin: { es: 'Griego', en: 'Greek' },
+    definition: {
+      es: 'El momento oportuno o decisivo. Tiempo cualitativo, distinto de "cronos" (el tiempo cronológico que transcurre).',
+      en: 'The opportune or decisive moment. Qualitative time, distinct from "chronos" (sequential, measured time).',
+    },
+  },
+  {
+    word: 'Cronos',
+    origin: { es: 'Griego', en: 'Greek' },
+    definition: {
+      es: 'Tiempo cronológico y secuencial, el que se mide en horas y días, en contraste con "kairos" (el momento oportuno).',
+      en: 'Sequential, measured time — hours and days — in contrast with "kairos" (the opportune moment).',
+    },
+  },
+  {
+    word: 'Jaris',
+    origin: { es: 'Griego', en: 'Greek' },
+    definition: {
+      es: 'Gracia. Palabra griega detrás del término "gracia": favor inmerecido y generoso que Dios da libremente.',
+      en: 'Grace. The Greek word behind the term "grace": unmerited, generous favor freely given by God.',
+    },
+  },
+  {
+    word: 'Pistis',
+    origin: { es: 'Griego', en: 'Greek' },
+    definition: {
+      es: 'Fe. Convicción de la verdad unida a la confianza personal; la palabra griega detrás de "fe" en el Nuevo Testamento.',
+      en: 'Faith. Conviction of truth joined with personal trust; the Greek word behind "faith" in the New Testament.',
+    },
+  },
+  {
+    word: 'Eclesía',
+    origin: { es: 'Griego', en: 'Greek' },
+    definition: {
+      es: 'Asamblea o "los llamados a salir". Palabra griega traducida como "iglesia" en el Nuevo Testamento.',
+      en: 'Assembly or "those called out". Greek word translated as "church" in the New Testament.',
+    },
+  },
+  {
+    word: 'Kyrios',
+    origin: { es: 'Griego', en: 'Greek' },
+    definition: {
+      es: 'Señor o Amo. Título griego aplicado a Jesús que afirma su autoridad y divinidad.',
+      en: 'Lord or Master. Greek title applied to Jesus affirming his authority and deity.',
+    },
+  },
+  {
+    word: 'Pneuma',
+    origin: { es: 'Griego', en: 'Greek' },
+    definition: {
+      es: 'Espíritu, aliento o viento. Palabra griega paralela al hebreo "ruaj", usada para el Espíritu Santo.',
+      en: 'Spirit, breath or wind. Greek word paralleling the Hebrew "ruach", used for the Holy Spirit.',
+    },
+  },
+  {
     word: 'Emanuel',
     origin: { es: 'Hebreo', en: 'Hebrew' },
     definition: {

@@ -8,6 +8,7 @@ import {
   TextInput,
   StyleSheet,
   PanResponder,
+  Animated,
 } from 'react-native';
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -418,25 +419,49 @@ function Reader({
   // obsoletos de un capítulo anterior.
   const navRef = useRef({ next, prev });
   useEffect(() => { navRef.current = { next, prev }; });
+  const swipeX = useRef(new Animated.Value(0)).current;
   const swipe = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 24 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
+      onPanResponderMove: (_, g) => swipeX.setValue(g.dx),
       onPanResponderRelease: (_, g) => {
         if (g.dx < -60) navRef.current.next();
         else if (g.dx > 60) navRef.current.prev();
+        Animated.timing(swipeX, { toValue: 0, duration: 180, useNativeDriver: true }).start();
+      },
+      onPanResponderTerminate: () => {
+        Animated.timing(swipeX, { toValue: 0, duration: 180, useNativeDriver: true }).start();
       },
     })
   ).current;
+  const prevTrailOpacity = swipeX.interpolate({ inputRange: [0, 90], outputRange: [0, 0.9], extrapolate: 'clamp' });
+  const nextTrailOpacity = swipeX.interpolate({ inputRange: [-90, 0], outputRange: [0.9, 0], extrapolate: 'clamp' });
 
   return (
     <View style={styles.container} {...swipe.panHandlers}>
+      {/* Rastro sutil que aparece mientras se desliza para cambiar de capítulo */}
+      <Animated.View
+        pointerEvents="none"
+        style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 60, zIndex: 5, alignItems: 'flex-start', justifyContent: 'center', paddingLeft: 8, opacity: prevTrailOpacity }}
+      >
+        <Ionicons name="chevron-back" size={30} color={themeColors.accent} />
+      </Animated.View>
+      <Animated.View
+        pointerEvents="none"
+        style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 60, zIndex: 5, alignItems: 'flex-end', justifyContent: 'center', paddingRight: 8, opacity: nextTrailOpacity }}
+      >
+        <Ionicons name="chevron-forward" size={30} color={themeColors.accent} />
+      </Animated.View>
       <View style={styles.subHead}>
         <Pressable onPress={onBooks} hitSlop={12} style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name="chevron-back" size={22} color={themeColors.accent} />
-          <Text style={[styles.back, { fontSize: 17 }]}>Libros</Text>
+          <Text style={[styles.back, { fontSize: 18, fontWeight: '800' }]}>Libros</Text>
         </Pressable>
         <Pressable onPress={onChapters} hitSlop={12}><Text style={styles.subTitle}>{b.name} {chapter}</Text></Pressable>
-        <Pressable style={styles.versionChip} onPress={() => setPickerOpen(true)}>
+        <Pressable
+          style={[styles.versionChip, { borderRadius: 6, marginLeft: 6 }]}
+          onPress={() => setPickerOpen(true)}
+        >
           <Text style={styles.versionText}>{VERSION.abbr}</Text>
         </Pressable>
         <View style={{ flex: 1 }} />
