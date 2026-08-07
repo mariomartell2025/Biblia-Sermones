@@ -12,13 +12,9 @@ export const SettingsContext = createContext<SettingsContextType | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    loadSettings().then(s => {
-      setSettings(s);
-      setLoaded(true);
-    });
+    loadSettings().then(setSettings);
   }, []);
 
   const updateAndSave = (patch: Partial<AppSettings>) => {
@@ -26,10 +22,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings(next);
     saveSettings(patch);
   };
-
-  if (!loaded) {
-    return <>{children}</>;
-  }
 
   const value: SettingsContextType = {
     ...settings,
