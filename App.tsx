@@ -152,17 +152,12 @@ export default function App() {
         {!isFullscreen && (
           <View style={styles.tabBar}>
             <TabButton label="Devocional" icon="sparkles" active={tab === 'devocional'} onPress={() => setTab('devocional')} />
-            <TabButton label="Manual" icon="document" active={tab === 'manual'} onPress={() => setTab('manual')} />
             <TabButton
               label="Sermones"
               icon="albums"
               active={tab === 'sermones'}
               onPress={() => { setTab('sermones'); setScreen({ name: 'list' }); }}
             />
-            <Pressable style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} onPress={openBibleVersions} hitSlop={12}>
-              <Ionicons name="list" size={23} color={theme.textMuted} />
-              <Text style={[styles.tabLabel, { marginTop: 4 }]}>Versiones</Text>
-            </Pressable>
             <TabButton label="Biblia" icon="book" active={tab === 'biblia'} onPress={() => setTab('biblia')} />
           </View>
         )}
