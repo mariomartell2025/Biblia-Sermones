@@ -356,6 +356,7 @@ function Reader({
   onSettings?: () => void;
   onChange: (book: number, chapter: number) => void;
 }) {
+  const themeColors = useTheme();
   const b = BOOKS[book];
   const responsive = useResponsive();
   const rStyles = responsiveStyles(responsive);
