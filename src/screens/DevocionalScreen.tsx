@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator,
-  useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, Alert,
+  useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, Alert, BackHandler,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme';
@@ -24,6 +24,17 @@ export default function DevocionalScreen() {
   useEffect(() => {
     loadDevotionals().then((list) => { setItems(list); setSelId(list[0]?.id ?? null); });
   }, []);
+
+  // En modo lectura, el botón/gesto de retroceso sale del modo lectura en
+  // vez de cerrar la app.
+  useEffect(() => {
+    const onBackPress = () => {
+      if (reading) { setReading(false); return true; }
+      return false;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [reading]);
 
   const notify = (m: string) => (typeof alert === 'function' ? alert(m) : Alert.alert('Devocional', m));
   const sel = useMemo(() => items?.find((d) => d.id === selId) || items?.[0], [items, selId]);

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Pressable, StyleSheet, ActivityIndicator, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -42,6 +42,37 @@ export default function App() {
   useEffect(() => {
     loadSermons().then(setSermons);
   }, []);
+
+  // Botón/gesto de retroceso de Android: navega dentro de la app en vez de
+  // cerrarla de inmediato. En la raíz de una pestaña, pide un segundo toque
+  // antes de salir ("Presiona de nuevo para salir").
+  const lastBackPressRef = useRef(0);
+  useEffect(() => {
+    const onBackPress = () => {
+      if (tab === 'sermones') {
+        if (screen.name === 'preach') {
+          setScreen({ name: 'detail', id: screen.id });
+          return true;
+        }
+        if (screen.name === 'edit') {
+          const isNew = !!draft && draft.id === screen.id;
+          setScreen(isNew ? { name: 'list' } : { name: 'detail', id: screen.id });
+          return true;
+        }
+        if (screen.name === 'detail') {
+          setScreen({ name: 'list' });
+          return true;
+        }
+      }
+      const now = Date.now();
+      if (now - lastBackPressRef.current < 2000) return false;
+      lastBackPressRef.current = now;
+      if (Platform.OS === 'android') ToastAndroid.show('Presiona de nuevo para salir', ToastAndroid.SHORT);
+      return true;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [tab, screen, draft]);
 
   const persist = (next: Sermon[]) => {
     setSermons(next);

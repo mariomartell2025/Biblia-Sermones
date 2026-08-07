@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../useTheme';
 import { useSettings } from '../SettingsContext';
@@ -950,6 +950,17 @@ export default function MinisterManualScreen() {
   const settings = useSettings();
   const lang = settings.language as 'es' | 'en';
   const [selected, setSelected] = useState<Ceremony | null>(null);
+
+  // Con una ceremonia abierta, el botón/gesto de retroceso vuelve a la lista
+  // en vez de cerrar la app.
+  useEffect(() => {
+    const onBackPress = () => {
+      if (selected) { setSelected(null); return true; }
+      return false;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [selected]);
 
   const ceremony = selected ? CEREMONIES[selected] : null;
   const content = ceremony ? ceremony.content[lang] : '';

@@ -10,6 +10,7 @@ import {
   PanResponder,
   Animated,
   Share,
+  BackHandler,
 } from 'react-native';
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,6 +64,33 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
   // Arranca en el lector, en la última posición leída (o Juan 1 la 1a vez).
   const [view, setView] = useState<View>({ name: 'reader', ...DEFAULT_POS });
   const [pos, setPos] = useState(DEFAULT_POS); // última posición del lector
+
+  // Botón/gesto de retroceso: navega dentro de la Biblia (libros/capítulos/
+  // versículos/búsqueda/favoritos) antes de dejar que el nivel superior
+  // decida salir de la app. 'reader' es la raíz: no hay más adentro que hacer.
+  useEffect(() => {
+    const onBackPress = () => {
+      switch (view.name) {
+        case 'chapters':
+          setView({ name: 'books' });
+          return true;
+        case 'verses':
+          setView({ name: 'chapters', book: view.book });
+          return true;
+        case 'search':
+        case 'favorites':
+          setView({ name: 'reader', book: pos.book, chapter: pos.chapter });
+          return true;
+        case 'books':
+          setView({ name: 'reader', book: pos.book, chapter: pos.chapter });
+          return true;
+        default:
+          return false;
+      }
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [view, pos]);
 
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: themeColors.bg },
