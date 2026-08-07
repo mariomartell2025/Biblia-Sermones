@@ -9,6 +9,7 @@ import {
   StyleSheet,
   PanResponder,
   Animated,
+  Share,
 } from 'react-native';
 import { Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,6 +38,10 @@ import { chapterOf, searchOf } from '../bible/query';
 import { useFavorite, useLogChapterRead, useChapterHighlights } from '../bible/useBible';
 import { searchDictionary } from '../bible/dictionary';
 import { theme } from '../theme';
+
+// Enlace de descarga que se adjunta al compartir. Es el canal de distribución
+// actual (GitHub releases); actualizar aquí cuando la app esté en las tiendas.
+const APP_SHARE_URL = 'https://github.com/mariomartell2025/Biblia-Sermones/releases/latest';
 
 type ConnectFn = (sermonId: string, v: { ref: string; text: string }) => void;
 
@@ -399,6 +404,13 @@ function Reader({
     return () => { alive = false; };
   }, [book, chapter]);
 
+  const shareChapter = async () => {
+    const body = verses.map((v, i) => `${i + 1}  ${v}`).join('\n');
+    try {
+      await Share.share({ message: `${b.name} ${chapter}\n\n${body}\n\n📖 ${APP_SHARE_URL}` });
+    } catch {}
+  };
+
   useEffect(() => {
     // Depende también de `verses`: si el capítulo es nuevo, los versículos (y sus
     // refs) aún no existen cuando `target` cambia, así que sin esto el scroll
@@ -526,6 +538,7 @@ function Reader({
           <Text style={styles.versionText}>{VERSION.abbr}</Text>
         </Pressable>
         <View style={{ flex: 1 }} />
+        <Pressable onPress={shareChapter} hitSlop={12} style={{ marginRight: 12 }}><Ionicons name="share-social-outline" size={20} color={themeColors.accent} /></Pressable>
         <Pressable onPress={onSearch} hitSlop={12}><Ionicons name="search" size={20} color={themeColors.accent} /></Pressable>
         <Pressable onPress={onSettings} hitSlop={12} style={{ marginLeft: 12 }}><Ionicons name="settings-outline" size={20} color={themeColors.accent} /></Pressable>
       </View>
@@ -619,6 +632,14 @@ function VerseActions({
     if (verse) await Clipboard.setStringAsync(`${verse.text} (${verse.ref})`);
     close();
   };
+  const share = async () => {
+    if (verse) {
+      try {
+        await Share.share({ message: `"${verse.text}"\n${verse.ref}\n\n📖 ${APP_SHARE_URL}` });
+      } catch {}
+    }
+    close();
+  };
   const connect = (id: string, title: string) => {
     onConnect(id);
     setDone(title);
@@ -663,6 +684,10 @@ function VerseActions({
                   <Pressable style={styles.sheetBtn} onPress={copy}>
                     <Ionicons name="copy-outline" size={18} color={themeColors.text} />
                     <Text style={styles.sheetBtnText}>Copiar versículo</Text>
+                  </Pressable>
+                  <Pressable style={styles.sheetBtn} onPress={share}>
+                    <Ionicons name="share-outline" size={18} color={themeColors.text} />
+                    <Text style={styles.sheetBtnText}>Compartir versículo</Text>
                   </Pressable>
                   <Pressable style={styles.sheetBtn} onPress={close}>
                     <Text style={styles.sheetBtnMuted}>Cancelar</Text>
