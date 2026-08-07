@@ -1,5 +1,6 @@
 export interface DictionaryEntry {
   word: string;
+  origin?: { es: string; en: string };
   definition: {
     es: string;
     en: string;
@@ -9,6 +10,7 @@ export interface DictionaryEntry {
 export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   {
     word: 'Kadosh',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
     definition: {
       es: 'Santo. Palabra hebrea que significa separado, consagrado o apartado para Dios. Describe la santidad y pureza divina.',
       en: 'Holy. Hebrew word meaning separated, consecrated or set apart for God. Describes divine holiness and purity.',
@@ -16,6 +18,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Logos',
+    origin: { es: 'Griego', en: 'Greek' },
     definition: {
       es: 'Palabra. Término griego que significa palabra, razón o mensaje divino. En Juan 1:1 se refiere a Jesús como la Palabra de Dios.',
       en: 'Word. Greek term meaning word, reason or divine message. In John 1:1 it refers to Jesus as the Word of God.',
@@ -23,6 +26,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Ágape',
+    origin: { es: 'Griego', en: 'Greek' },
     definition: {
       es: 'Amor incondicional. El amor más alto en el cristianismo, el amor sacrificial de Dios hacia la humanidad.',
       en: 'Unconditional love. The highest form of love in Christianity, God\'s sacrificial love for humanity.',
@@ -30,6 +34,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Metanoia',
+    origin: { es: 'Griego', en: 'Greek' },
     definition: {
       es: 'Arrepentimiento. Cambio de mente o transformación del pensamiento que resulta en un cambio de dirección moral.',
       en: 'Repentance. Change of mind or transformation of thought resulting in moral change of direction.',
@@ -37,6 +42,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Dunamis',
+    origin: { es: 'Griego', en: 'Greek' },
     definition: {
       es: 'Poder. Fuerza o capacidad divina. La raíz de la palabra "dinamo". Poder transformador y milagroso.',
       en: 'Power. Divine strength or capacity. The root of the word "dynamo". Transforming and miraculous power.',
@@ -44,6 +50,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Soteria',
+    origin: { es: 'Griego', en: 'Greek' },
     definition: {
       es: 'Salvación. Rescate, liberación y sanidad espiritual. Significa ser salvado del pecado y sus consecuencias.',
       en: 'Salvation. Rescue, liberation and spiritual healing. Means to be saved from sin and its consequences.',
@@ -51,6 +58,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Shalom',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
     definition: {
       es: 'Paz. Palabra hebrea que significa paz, completitud, bienestar y armonía. Va más allá de la ausencia de conflicto.',
       en: 'Peace. Hebrew word meaning peace, wholeness, well-being and harmony. Goes beyond the absence of conflict.',
@@ -58,6 +66,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Koinonia',
+    origin: { es: 'Griego', en: 'Greek' },
     definition: {
       es: 'Comunión. Participación, compañerismo o comunidad. La relación íntima entre creyentes y con Dios.',
       en: 'Communion. Participation, fellowship or community. Intimate relationship between believers and with God.',
@@ -65,6 +74,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Maranatha',
+    origin: { es: 'Arameo', en: 'Aramaic' },
     definition: {
       es: 'El Señor viene. Frase aramea que expresa la expectativa del regreso de Jesucristo.',
       en: 'The Lord comes. Aramaic phrase expressing expectation of Jesus Christ\'s return.',
@@ -72,6 +82,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Elohim',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
     definition: {
       es: 'Dios. Nombre hebreo plural para Dios que enfatiza la majestad, poder y autoridad divina.',
       en: 'God. Hebrew plural name for God emphasizing divine majesty, power and authority.',
@@ -79,6 +90,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Jehová',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
     definition: {
       es: 'Señor. Nombre divino sagrado, frecuentemente traducido como SEÑOR. Significa "El que es" o "existencia eterna".',
       en: 'Lord. Sacred divine name, frequently translated as LORD. Means "He who is" or "eternal existence".',
@@ -86,6 +98,7 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
   },
   {
     word: 'Mesías',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
     definition: {
       es: 'Ungido. Palabra que significa "el que es ungido" o "el escogido". Referencia a Jesucristo como el Salvador prometido.',
       en: 'Anointed. Word meaning "the one who is anointed" or "the chosen one". Reference to Jesus Christ as the promised Savior.',
@@ -110,6 +123,149 @@ export const BIBLE_DICTIONARY: DictionaryEntry[] = [
     definition: {
       es: 'Favor inmerecido. El regalo gratuito de Dios de salvación sin depender de las obras humanas. Amor sin merecimiento.',
       en: 'Undeserved favor. God\'s free gift of salvation not dependent on human works. Love without merit.',
+    }
+  },
+  {
+    word: 'Yaweh',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Nombre divino sagrado, frecuentemente traducido como SEÑOR. Significa "El que es" o existencia eterna.',
+      en: 'Sacred divine name, frequently translated as LORD. Means "He who is" or eternal existence.',
+    }
+  },
+  {
+    word: 'Shadai',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Dios Todopoderoso. Nombre hebreo que significa "El que es suficiente" o "Dios Fuerte y Poderoso".',
+      en: 'God Almighty. Hebrew name meaning "The One who is sufficient" or "Strong and Mighty God".',
+    }
+  },
+  {
+    word: 'Belén',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Casa del pan. Pequeño pueblo en Judea donde nació Jesucristo. Sitio histórico y religioso significativo.',
+      en: 'House of bread. Small town in Judea where Jesus Christ was born. Significant historical and religious site.',
+    }
+  },
+  {
+    word: 'Espíritu Santo',
+    definition: {
+      es: 'Tercera persona de la Trinidad. Agente divino de santificación, consuelo y poder en la vida cristiana.',
+      en: 'Third person of the Trinity. Divine agent of sanctification, comfort and power in Christian life.',
+    }
+  },
+  {
+    word: 'Trinidad',
+    definition: {
+      es: 'Doctrina cristiana de que Dios existe como tres personas: Padre, Hijo y Espíritu Santo, en una sola esencia.',
+      en: 'Christian doctrine that God exists as three persons: Father, Son and Holy Spirit, in one essence.',
+    }
+  },
+  {
+    word: 'Redención',
+    definition: {
+      es: 'Acción de rescatar o liberar. Salvación a través de la muerte y resurrección de Jesucristo.',
+      en: 'Action of rescuing or liberating. Salvation through the death and resurrection of Jesus Christ.',
+    }
+  },
+  {
+    word: 'Justificación',
+    definition: {
+      es: 'Acto de Dios por el cual declara justo al pecador mediante la fe en Cristo. Imputación de justicia divina.',
+      en: 'Act of God by which He declares the sinner righteous through faith in Christ. Imputation of divine justice.',
+    }
+  },
+  {
+    word: 'Santificación',
+    definition: {
+      es: 'Proceso continuo de ser apartado para Dios y hacerse cada vez más como Cristo en carácter y conducta.',
+      en: 'Continuous process of being set apart for God and becoming increasingly like Christ in character and conduct.',
+    }
+  },
+  {
+    word: 'Resurrección',
+    definition: {
+      es: 'Levantamiento de los muertos. Especialmente la resurrección de Jesucristo al tercer día después de su muerte.',
+      en: 'Rising from the dead. Especially the resurrection of Jesus Christ on the third day after his death.',
+    }
+  },
+  {
+    word: 'Arrepentimiento',
+    definition: {
+      es: 'Cambio de mente y vuelta del pecado. Rechazo del pecado y regreso a Dios en obediencia.',
+      en: 'Change of mind and turning from sin. Rejection of sin and return to God in obedience.',
+    }
+  },
+  {
+    word: 'Pecado',
+    definition: {
+      es: 'Transgresión de la ley de Dios. Acto, pensamiento o naturaleza que viola la voluntad y santidad divina.',
+      en: 'Transgression of God\'s law. Act, thought or nature that violates divine will and holiness.',
+    }
+  },
+  {
+    word: 'Perdón',
+    definition: {
+      es: 'Remisión de castigo merecido. Acto de Dios de liberar al culpable de la culpa y condenación del pecado.',
+      en: 'Remission of deserved punishment. Act of God to free the guilty from guilt and condemnation of sin.',
+    }
+  },
+  {
+    word: 'Hesed',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Misericordia pactual. Amor leal e inquebrantable de Dios hacia su pueblo, ligado a su promesa y fidelidad.',
+      en: 'Covenant mercy. God\'s loyal, unwavering love toward his people, bound to his promise and faithfulness.',
+    }
+  },
+  {
+    word: 'Ruach',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Espíritu, viento o aliento. Palabra hebrea usada para el Espíritu de Dios que da vida y se mueve sobre la creación.',
+      en: 'Spirit, wind or breath. Hebrew word used for the Spirit of God that gives life and moves over creation.',
+    }
+  },
+  {
+    word: 'Torá',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Ley o instrucción. Los primeros cinco libros de la Biblia (el Pentateuco), la enseñanza fundamental dada a Israel.',
+      en: 'Law or instruction. The first five books of the Bible (the Pentateuch), the foundational teaching given to Israel.',
+    }
+  },
+  {
+    word: 'Emet',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Verdad. Palabra hebrea que denota firmeza, fidelidad y confiabilidad, no solo exactitud de un hecho.',
+      en: 'Truth. Hebrew word denoting firmness, faithfulness and reliability, not just factual accuracy.',
+    }
+  },
+  {
+    word: 'Selah',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Pausa, detente. Término usado con frecuencia en los Salmos, probablemente una indicación musical para reflexionar.',
+      en: 'Pause, stop. Term frequently used in the Psalms, likely a musical cue to pause and reflect.',
+    }
+  },
+  {
+    word: 'Aleluya',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Alaben a Yah. Del hebreo "Hallelu-Yah", una exclamación de alabanza dirigida a Dios.',
+      en: 'Praise Yah. From the Hebrew "Hallelu-Yah", an exclamation of praise directed to God.',
+    }
+  },
+  {
+    word: 'Amén',
+    origin: { es: 'Hebreo', en: 'Hebrew' },
+    definition: {
+      es: 'Así sea. Palabra hebrea de afirmación y confirmación, de la misma raíz que "emet" (verdad).',
+      en: 'So be it. Hebrew word of affirmation and confirmation, from the same root as "emet" (truth).',
     }
   },
 ];

@@ -369,19 +369,28 @@ function Reader({
   }, [book, chapter]);
 
   useEffect(() => {
+    // Depende también de `verses`: si el capítulo es nuevo, los versículos (y sus
+    // refs) aún no existen cuando `target` cambia, así que sin esto el scroll
+    // no se dispara nunca al abrir un resultado de búsqueda en otro capítulo.
     if (target && scrollRef.current && verseRefs.current[target]) {
       setTimeout(() => {
         verseRefs.current[target]?.measure((x, y, width, height, pageX, pageY) => {
-          scrollRef.current?.scrollTo({ y: pageY - 100, animated: true });
+          scrollRef.current?.scrollTo({ y: Math.max(0, pageY - 100), animated: true });
         });
       }, 150);
     }
-  }, [target]);
+  }, [target, verses]);
 
   useLogChapterRead(book, chapter);
   const scrollRef = useRef<ScrollView>(null);
   const verseRefs = useRef<{ [key: number]: any }>({});
   const [selected, setSelected] = useState<number | null>(null); // versículo con menú abierto
+  const [tapped, setTapped] = useState<number | null>(null); // versículo resaltado con un toque
+
+  useEffect(() => {
+    setTapped(null);
+    setSelected(null);
+  }, [book, chapter]);
 
   const prev = () => {
     if (chapter > 1) onChange(book, chapter - 1);
@@ -410,11 +419,12 @@ function Reader({
         <Text style={styles.chapterTitle}>{b.name} {chapter}</Text>
         {verses.map((v, i) => {
           const n = i + 1;
-          const active = target === n || selected === n;
+          const active = target === n || selected === n || tapped === n;
           return (
             <Pressable
               key={n}
               ref={(ref) => { if (ref) verseRefs.current[n] = ref; }}
+              onPress={() => setTapped((prev) => (prev === n ? null : n))}
               onLongPress={() => setSelected(n)}
               delayLongPress={280}
               style={[styles.verseRow, active && styles.verseHighlight]}
@@ -592,6 +602,7 @@ function Search({
   onOpen: (book: number, chapter: number, verse?: number) => void;
   styles: any;
 }) {
+  const themeColors = useTheme();
   const responsive = useResponsive();
   const rStyles = responsiveStyles(responsive);
   const settings = useSettings();
@@ -660,7 +671,14 @@ function Search({
             </Text>
             {dictionaryResults.map((entry, k) => (
               <View key={k} style={[styles.hit, { marginBottom: 12 }]}>
-                <Text style={styles.hitRef}>{entry.word}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={styles.hitRef}>{entry.word}</Text>
+                  {!!entry.origin && (
+                    <View style={{ backgroundColor: themeColors.bgElevated, borderWidth: 1, borderColor: themeColors.cardBorder, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 }}>
+                      <Text style={{ color: themeColors.accent, fontSize: 10, fontWeight: '800' }}>{entry.origin[lang]}</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={styles.hitText}>{entry.definition[lang]}</Text>
               </View>
             ))}
