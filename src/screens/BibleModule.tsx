@@ -49,7 +49,7 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
   const settings = useSettings();
 
   // Arranca en el lector, en la última posición leída (o Juan 1 la 1a vez).
-  const [view, setView] = useState<View | null>(null);
+  const [view, setView] = useState<View>({ name: 'reader', ...DEFAULT_POS });
   const [pos, setPos] = useState(DEFAULT_POS); // última posición del lector
 
   const styles = StyleSheet.create({
@@ -170,8 +170,6 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
     setView({ name: 'reader', book, chapter, target });
     AsyncStorage.setItem(LAST_KEY, JSON.stringify({ book, chapter })).catch(() => {});
   };
-
-  if (!view) return <View style={styles.container} />;
 
   switch (view.name) {
     case 'chapters':
