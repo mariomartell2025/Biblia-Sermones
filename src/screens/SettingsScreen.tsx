@@ -133,7 +133,7 @@ export default function SettingsScreen() {
             </Text>
             <Pressable
               style={[styles.optionBtn, { flex: 0, width: 50 }]}
-              onPress={() => settings.setFontSize(Math.min(20, settings.fontSize + 1))}
+              onPress={() => settings.setFontSize(Math.min(30, settings.fontSize + 1))}
             >
               <Text style={[styles.optionText, { fontSize: 20 }]}>+</Text>
             </Pressable>
