@@ -13,10 +13,15 @@ export let ready = false;
 
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-// Estructura del rvr.json empaquetado: [{ name, abbr, testament, chapters: [[verso,...]] }]
-function loadSeed(): any[] {
-  return require('../../assets/bible/rvr.json');
-}
+// Versiones que van empaquetadas en la app desde el primer momento (offline,
+// sin descarga): una en español y una en inglés. El resto (ASV, RVA1865...)
+// se descarga bajo demanda vía downloadAndSeedVersion, para no inflar el
+// tamaño de cada actualización con texto que la mayoría no va a usar.
+// Estructura de cada archivo: [{ name, abbr, testament, chapters: [[verso,...]] }]
+const BUNDLED_SEEDS: Record<string, () => any[]> = {
+  rvr1909: () => require('../../assets/bible/rvr.json'),
+  kjv: () => require('../../assets/bible/kjv.json'),
+};
 
 export async function initBibleDb(): Promise<boolean> {
   if (ready) return true;
@@ -65,12 +70,14 @@ export async function initBibleDb(): Promise<boolean> {
       );
     `);
 
-    // ¿Ya está sembrada la RV1909?
-    const row = await db.getFirstAsync<{ n: number }>(
-      `SELECT COUNT(*) AS n FROM verses WHERE version = ?`, 'rvr1909'
-    );
-    if (!row || row.n === 0) {
-      await seedVersion('rvr1909');
+    // Sembrar las versiones empaquetadas que aún no estén en la base.
+    for (const version of Object.keys(BUNDLED_SEEDS)) {
+      const row = await db.getFirstAsync<{ n: number }>(
+        `SELECT COUNT(*) AS n FROM verses WHERE version = ?`, version
+      );
+      if (!row || row.n === 0) {
+        await seedVersionData(version, BUNDLED_SEEDS[version]());
+      }
     }
     // Inicializar módulos de favoritos, historial y resaltados
     const { initFavDb } = await import('./favorites');
@@ -81,7 +88,7 @@ export async function initBibleDb(): Promise<boolean> {
     await initHighlightsDb(db);
 
     ready = true;
-    console.log('SQLite Biblia lista (rvr1909 sembrada)');
+    console.log('SQLite Biblia lista');
     return true;
   } catch (e) {
     console.warn('SQLite no disponible, uso modo en-memoria:', e);
@@ -90,9 +97,8 @@ export async function initBibleDb(): Promise<boolean> {
   }
 }
 
-async function seedVersion(version: string) {
+async function seedVersionData(version: string, data: any[]) {
   if (!db) return;
-  const data = loadSeed();
   await db.withTransactionAsync(async () => {
     const stmt = await db!.prepareAsync(
       `INSERT INTO verses (version, book, chapter, verse, text, norm) VALUES (?, ?, ?, ?, ?, ?)`
@@ -111,6 +117,29 @@ async function seedVersion(version: string) {
       await stmt.finalizeAsync();
     }
   });
+}
+
+// ¿Ya están los versículos de esta versión en la base (empaquetada o
+// descargada antes)?
+export async function isVersionSeeded(version: string): Promise<boolean> {
+  if (!db || !ready) return false;
+  const row = await db.getFirstAsync<{ n: number }>(
+    `SELECT COUNT(*) AS n FROM verses WHERE version = ?`, version
+  );
+  return !!row && row.n > 0;
+}
+
+// Descarga el JSON de una versión (formato igual al de los archivos
+// empaquetados) y la siembra en SQLite. Solo necesita internet la primera
+// vez; después queda disponible offline como cualquier otra versión.
+export async function downloadAndSeedVersion(version: string, url: string): Promise<boolean> {
+  if (!db || !ready) return false;
+  if (await isVersionSeeded(version)) return true;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`No se pudo descargar (${res.status})`);
+  const data = await res.json();
+  await seedVersionData(version, data);
+  return true;
 }
 
 export async function dbChapter(version: string, book: number, chapter: number): Promise<string[]> {

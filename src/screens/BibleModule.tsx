@@ -35,14 +35,19 @@ import {
   getVerseText,
   formatRef,
 } from '../bible/data';
-import { chapterOf, searchOf } from '../bible/query';
+import { chapterOf, searchOf, verseOf } from '../bible/query';
 import { useFavorite, useLogChapterRead, useChapterHighlights } from '../bible/useBible';
 import { searchDictionary } from '../bible/dictionary';
+import { VERSIONS } from '../bible/versions';
 import { theme } from '../theme';
 
 // Enlace de descarga que se adjunta al compartir. Es el canal de distribución
 // actual (GitHub releases); actualizar aquí cuando la app esté en las tiendas.
 const APP_SHARE_URL = 'https://github.com/mariomartell2025/Biblia-Sermones/releases/latest';
+
+function versionAbbr(id: string): string {
+  return VERSIONS.find((v) => v.id === id)?.abbr ?? VERSION.abbr;
+}
 
 type ConnectFn = (sermonId: string, v: { ref: string; text: string }) => void;
 
@@ -292,7 +297,7 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
 /* ---------- Libros ---------- */
 function Books({ onPick, onSearch, onBack, onFavorites, styles }: { onPick: (b: number) => void; onSearch: () => void; onBack?: () => void; onFavorites: () => void; styles: any }) {
   const themeColors = useTheme();
-  const [versionId, setVersionId] = useState('rvr1909'); // versión activa (única disponible por ahora)
+  const settings = useSettings();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [isListView, setIsListView] = useState(false);
   const notify = (m: string) => (typeof alert === 'function' ? alert(m) : null);
@@ -321,15 +326,15 @@ function Books({ onPick, onSearch, onBack, onFavorites, styles }: { onPick: (b: 
             <Text style={styles.versionText}>{isListView ? '■■' : '⊞⊞'}</Text>
           </Pressable>
           <Pressable style={[styles.versionChip, { borderRadius: 6 }]} onPress={() => setPickerOpen(true)}>
-            <Text style={styles.versionText}>{VERSION.abbr}</Text>
+            <Text style={styles.versionText}>{versionAbbr(settings.defaultVersion)}</Text>
           </Pressable>
         </View>
       </View>
       <VersionPicker
         visible={pickerOpen}
-        currentId={versionId}
+        currentId={settings.defaultVersion}
         onClose={() => setPickerOpen(false)}
-        onPick={(v) => { setVersionId(v.id); setPickerOpen(false); }}
+        onPick={(v) => { settings.setDefaultVersion(v.id); setPickerOpen(false); }}
         onLocked={(v) => notify(`${v.name} estará disponible con la suscripción. Estamos gestionando la licencia.`)}
       />
       <Pressable style={styles.searchBar} onPress={onSearch}>
@@ -422,15 +427,16 @@ function Reader({
   onChange: (book: number, chapter: number) => void;
 }) {
   const themeColors = useTheme();
+  const settings = useSettings();
   const b = BOOKS[book];
   const responsive = useResponsive();
   const rStyles = responsiveStyles(responsive);
   const [verses, setVerses] = useState<string[]>([]);
   useEffect(() => {
     let alive = true;
-    chapterOf(book, chapter).then(v => { if (alive) setVerses(v); });
+    chapterOf(book, chapter, settings.defaultVersion).then(v => { if (alive) setVerses(v); });
     return () => { alive = false; };
-  }, [book, chapter]);
+  }, [book, chapter, settings.defaultVersion]);
 
   const shareChapter = async () => {
     const body = verses.map((v, i) => `${i + 1}  ${v}`).join('\n');
@@ -452,7 +458,7 @@ function Reader({
     }
   }, [target, verses]);
 
-  useLogChapterRead(book, chapter);
+  useLogChapterRead(book, chapter, settings.defaultVersion);
   const scrollRef = useRef<ScrollView>(null);
   const verseRefs = useRef<{ [key: number]: any }>({});
   const [selected, setSelected] = useState<number | null>(null); // versículo con menú abierto
@@ -463,7 +469,6 @@ function Reader({
     setSelected(null);
   }, [book, chapter]);
 
-  const [versionId, setVersionId] = useState('rvr1909');
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const prev = () => {
@@ -480,8 +485,8 @@ function Reader({
       ? { ref: formatRef(book, chapter, selected), text: verses[selected - 1], book, chapter, verseNum: selected }
       : null;
 
-  const favorite = useFavorite(book, chapter, selected ?? 0);
-  const { highlights, apply: applyHighlight } = useChapterHighlights(book, chapter);
+  const favorite = useFavorite(book, chapter, selected ?? 0, settings.defaultVersion);
+  const { highlights, apply: applyHighlight } = useChapterHighlights(book, chapter, settings.defaultVersion);
 
   // Deslizar horizontalmente cambia de capítulo; solo se activa cuando el
   // movimiento es claramente horizontal para no interferir con el scroll vertical.
@@ -563,7 +568,7 @@ function Reader({
           style={[styles.versionChip, { borderRadius: 6, marginLeft: 6 }]}
           onPress={() => setPickerOpen(true)}
         >
-          <Text style={styles.versionText}>{VERSION.abbr}</Text>
+          <Text style={styles.versionText}>{versionAbbr(settings.defaultVersion)}</Text>
         </Pressable>
         <View style={{ flex: 1 }} />
         <Pressable onPress={shareChapter} hitSlop={12} style={{ marginRight: 12 }}><Ionicons name="share-social-outline" size={20} color={themeColors.accent} /></Pressable>
@@ -572,9 +577,9 @@ function Reader({
       </View>
       <VersionPicker
         visible={pickerOpen}
-        currentId={versionId}
+        currentId={settings.defaultVersion}
         onClose={() => setPickerOpen(false)}
-        onPick={(v) => { setVersionId(v.id); setPickerOpen(false); }}
+        onPick={(v) => { settings.setDefaultVersion(v.id); setPickerOpen(false); }}
         onLocked={(v) => (typeof alert === 'function' ? alert(`${v.name} estará disponible con la suscripción. Estamos gestionando la licencia.`) : null)}
       />
       <Animated.View
@@ -758,12 +763,13 @@ function VerseSelector({
   onSelectVerse: (verse: number) => void;
   onViewAll: () => void;
 }) {
+  const settings = useSettings();
   const b = BOOKS[book];
   const [verses, setVerses] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    chapterOf(book, chapter).then(setVerses);
-  }, [book, chapter]);
+    chapterOf(book, chapter, settings.defaultVersion).then(setVerses);
+  }, [book, chapter, settings.defaultVersion]);
 
   return (
     <View style={styles.container}>
@@ -825,9 +831,9 @@ function Search({
   useEffect(() => {
     if (q.trim().length < 3) { setHits([]); return; }
     let alive = true;
-    searchOf(q).then(r => { if (alive) setHits(r); });
+    searchOf(q, 80, settings.defaultVersion).then(r => { if (alive) setHits(r); });
     return () => { alive = false; };
-  }, [q]);
+  }, [q, settings.defaultVersion]);
 
   return (
     <View style={styles.container}>
@@ -943,16 +949,19 @@ function Favorites({
   onOpen: (book: number, chapter: number, verse: number) => void;
 }) {
   const themeColors = useTheme();
+  const settings = useSettings();
   const [items, setItems] = useState<(FavoriteVerse & { text: string | null }) [] | null>(null);
 
   useEffect(() => {
     let alive = true;
-    getFavorites('rvr1909').then((rows) => {
-      if (!alive) return;
-      setItems(rows.map((r) => ({ ...r, text: getVerseText(r.book, r.chapter, r.verse) })));
+    getFavorites(settings.defaultVersion).then(async (rows) => {
+      const withText = await Promise.all(
+        rows.map(async (r) => ({ ...r, text: await verseOf(r.book, r.chapter, r.verse, r.version) }))
+      );
+      if (alive) setItems(withText);
     });
     return () => { alive = false; };
-  }, []);
+  }, [settings.defaultVersion]);
 
   return (
     <View style={styles.container}>
