@@ -151,7 +151,7 @@ export default function App() {
 
         {!isFullscreen && (
           <View style={styles.tabBar}>
-            <TabButton label="Devocional" icon="sparkles" active={tab === 'devocional'} onPress={() => setTab('devocional')} />
+            <TabButton label="Devocional" icon="sunny" active={tab === 'devocional'} onPress={() => setTab('devocional')} />
             <TabButton
               label="Sermones"
               icon="albums"
