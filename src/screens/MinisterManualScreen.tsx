@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../useTheme';
 import { useSettings } from '../SettingsContext';
 
@@ -342,12 +343,12 @@ export default function MinisterManualScreen() {
     text: { color: themeColors.text, fontSize: settings.fontSize, lineHeight: settings.fontSize * 1.6, fontFamily: 'monospace' },
   });
 
-  const ceremoniesList: Array<{ key: Ceremony; label: string; icon: string }> = [
-    { key: 'cena', label: lang === 'es' ? 'Santa Cena' : 'Communion', icon: '🍷' },
-    { key: 'boda', label: lang === 'es' ? 'Boda' : 'Wedding', icon: '💒' },
-    { key: 'bautismo', label: lang === 'es' ? 'Bautismo' : 'Baptism', icon: '💧' },
-    { key: 'funeral', label: lang === 'es' ? 'Funeral' : 'Funeral', icon: '🕊️' },
-    { key: 'oracion', label: lang === 'es' ? 'Oración' : 'Prayer', icon: '🙏' },
+  const ceremoniesList: Array<{ key: Ceremony; label: string; iconName: keyof typeof Ionicons.glyphMap }> = [
+    { key: 'cena', label: lang === 'es' ? 'Santa Cena' : 'Communion', iconName: 'wine' },
+    { key: 'boda', label: lang === 'es' ? 'Boda' : 'Wedding', iconName: 'heart' },
+    { key: 'bautismo', label: lang === 'es' ? 'Bautismo' : 'Baptism', iconName: 'water' },
+    { key: 'funeral', label: lang === 'es' ? 'Funeral' : 'Funeral', iconName: 'leaf' },
+    { key: 'oracion', label: lang === 'es' ? 'Oración' : 'Prayer', iconName: 'hands' },
   ];
 
   return (
@@ -363,7 +364,7 @@ export default function MinisterManualScreen() {
             style={[styles.tab, selected === item.key && styles.tabActive]}
             onPress={() => setSelected(item.key)}
           >
-            <Text style={{ fontSize: 16, marginBottom: 4 }}>{item.icon}</Text>
+            <Ionicons name={item.iconName} size={20} color={selected === item.key ? themeColors.accentText : themeColors.text} style={{ marginBottom: 4 }} />
             <Text style={[styles.tabText, selected === item.key && styles.tabTextActive]}>
               {item.label}
             </Text>
@@ -372,7 +373,7 @@ export default function MinisterManualScreen() {
       </ScrollView>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.ceremonyIcon}>{ceremony.icon}</Text>
+        <Ionicons name={ceremoniesList.find(c => c.key === selected)?.iconName || 'book'} size={48} color={themeColors.accent} style={{ marginBottom: 12, textAlign: 'center' }} />
         <Text style={styles.ceremonyTitle}>{ceremony[lang]}</Text>
         <Text style={styles.text}>{content}</Text>
       </ScrollView>

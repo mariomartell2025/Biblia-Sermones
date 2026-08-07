@@ -121,18 +121,22 @@ export default function SettingsScreen() {
         {/* Tamaño de fuente */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('tamaño', lang)}</Text>
-          <View style={styles.sliderContainer}>
-            <Text style={styles.sliderLabel}>14</Text>
-            <View style={styles.sliderTrack}>
-              {[14, 15, 16, 17, 18, 19, 20].map((size) => (
-                <Pressable
-                  key={size}
-                  style={[styles.sliderDot, settings.fontSize === size && styles.sliderDotActive]}
-                  onPress={() => settings.setFontSize(size)}
-                />
-              ))}
-            </View>
-            <Text style={styles.sliderLabel}>20</Text>
+          <View style={[styles.sliderContainer, { justifyContent: 'center' }]}>
+            <Pressable
+              style={[styles.optionBtn, { flex: 0, width: 50 }]}
+              onPress={() => settings.setFontSize(Math.max(14, settings.fontSize - 1))}
+            >
+              <Text style={[styles.optionText, { fontSize: 20 }]}>−</Text>
+            </Pressable>
+            <Text style={[styles.sliderLabel, { width: 'auto', marginHorizontal: 16, fontSize: 16, fontWeight: '800', color: themeColors.text }]}>
+              {settings.fontSize}
+            </Text>
+            <Pressable
+              style={[styles.optionBtn, { flex: 0, width: 50 }]}
+              onPress={() => settings.setFontSize(Math.min(20, settings.fontSize + 1))}
+            >
+              <Text style={[styles.optionText, { fontSize: 20 }]}>+</Text>
+            </Pressable>
           </View>
           <Text style={styles.preview}>
             Abc 123 Versículo

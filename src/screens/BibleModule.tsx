@@ -30,6 +30,7 @@ import {
 import { chapterOf, searchOf } from '../bible/query';
 import { useFavorite, useLogChapterRead } from '../bible/useBible';
 import { searchDictionary } from '../bible/dictionary';
+import { theme } from '../theme';
 
 type ConnectFn = (sermonId: string, v: { ref: string; text: string }) => void;
 
@@ -223,13 +224,14 @@ export default function BibleModule({ sermons, onConnectVerse, onSettings }: { s
           styles={styles}
           onSearch={() => setView({ name: 'search' })}
           onPick={(book) => setView({ name: 'chapters', book })}
+          onBack={() => setView({ name: 'reader', book: pos.book, chapter: pos.chapter })}
         />
       );
   }
 }
 
 /* ---------- Libros ---------- */
-function Books({ onPick, onSearch, styles }: { onPick: (b: number) => void; onSearch: () => void; styles: any }) {
+function Books({ onPick, onSearch, onBack, styles }: { onPick: (b: number) => void; onSearch: () => void; onBack?: () => void; styles: any }) {
   const [versionId, setVersionId] = useState('rvr1909'); // versión activa (única disponible por ahora)
   const [pickerOpen, setPickerOpen] = useState(false);
   const [isListView, setIsListView] = useState(false);
@@ -247,7 +249,10 @@ function Books({ onPick, onSearch, styles }: { onPick: (b: number) => void; onSe
   return (
     <View style={styles.container}>
       <View style={styles.head}>
-        <Text style={styles.h1}>Biblia</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+          {onBack && <Pressable onPress={onBack} hitSlop={12}><Text style={styles.back}>‹</Text></Pressable>}
+          <Text style={styles.h1}>Biblia</Text>
+        </View>
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           <Pressable onPress={() => setIsListView(!isListView)} style={styles.versionChip}>
             <Text style={styles.versionText}>{isListView ? '■■' : '⊞⊞'}</Text>
@@ -364,15 +369,18 @@ function Reader({
   }, [book, chapter]);
 
   useEffect(() => {
-    if (target && scrollRef.current) {
+    if (target && scrollRef.current && verseRefs.current[target]) {
       setTimeout(() => {
-        scrollRef.current?.scrollTo({ y: (target - 1) * 60, animated: true });
-      }, 100);
+        verseRefs.current[target]?.measure((x, y, width, height, pageX, pageY) => {
+          scrollRef.current?.scrollTo({ y: pageY - 100, animated: true });
+        });
+      }, 150);
     }
   }, [target]);
 
   useLogChapterRead(book, chapter);
   const scrollRef = useRef<ScrollView>(null);
+  const verseRefs = useRef<{ [key: number]: any }>({});
   const [selected, setSelected] = useState<number | null>(null); // versículo con menú abierto
 
   const prev = () => {
@@ -406,6 +414,7 @@ function Reader({
           return (
             <Pressable
               key={n}
+              ref={(ref) => { if (ref) verseRefs.current[n] = ref; }}
               onLongPress={() => setSelected(n)}
               delayLongPress={280}
               style={[styles.verseRow, active && styles.verseHighlight]}

@@ -121,6 +121,10 @@ export default function App() {
     }
   };
 
+  const openBibleVersions = () => {
+    setTab('biblia');
+  };
+
   const isFullscreen = tab === 'sermones' && screen.name === 'preach';
 
   return (
@@ -155,7 +159,10 @@ export default function App() {
               active={tab === 'sermones'}
               onPress={() => { setTab('sermones'); setScreen({ name: 'list' }); }}
             />
-            <View style={{ flex: 1 }} />
+            <Pressable style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} onPress={openBibleVersions} hitSlop={12}>
+              <Ionicons name="list" size={23} color={theme.textMuted} />
+              <Text style={[styles.tabLabel, { marginTop: 4 }]}>Versiones</Text>
+            </Pressable>
             <TabButton label="Biblia" icon="book" active={tab === 'biblia'} onPress={() => setTab('biblia')} />
           </View>
         )}
