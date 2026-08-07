@@ -950,10 +950,10 @@ export default function MinisterManualScreen() {
   const themeColors = useTheme();
   const settings = useSettings();
   const lang = settings.language as 'es' | 'en';
-  const [selected, setSelected] = useState<Ceremony>('cena');
+  const [selected, setSelected] = useState<Ceremony | null>(null);
 
-  const ceremony = CEREMONIES[selected];
-  const content = ceremony.content[lang];
+  const ceremony = selected ? CEREMONIES[selected] : null;
+  const content = ceremony ? ceremony.content[lang] : '';
 
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: themeColors.bg },
