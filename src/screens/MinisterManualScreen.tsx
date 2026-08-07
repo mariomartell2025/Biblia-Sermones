@@ -340,7 +340,9 @@ export default function MinisterManualScreen() {
     content: { flex: 1, padding: 20, paddingBottom: 40 },
     ceremonyTitle: { color: themeColors.text, fontSize: 24, fontWeight: '800', marginBottom: 16 },
     ceremonyIcon: { fontSize: 48, marginBottom: 12 },
-    text: { color: themeColors.text, fontSize: settings.fontSize, lineHeight: settings.fontSize * 1.6, fontFamily: 'monospace' },
+    text: { color: themeColors.text, fontSize: settings.fontSize, lineHeight: settings.fontSize * 1.7 },
+    sectionNum: { color: themeColors.accent, fontWeight: '800', fontSize: settings.fontSize, marginBottom: 8, marginTop: 14 },
+    sectionText: { color: themeColors.text, fontSize: settings.fontSize, lineHeight: settings.fontSize * 1.7, marginLeft: 12, marginBottom: 6 },
   });
 
   const ceremoniesList: Array<{ key: Ceremony; label: string; iconName: keyof typeof Ionicons.glyphMap }> = [
@@ -373,9 +375,41 @@ export default function MinisterManualScreen() {
       </ScrollView>
 
       <ScrollView style={styles.content}>
-        <Ionicons name={ceremoniesList.find(c => c.key === selected)?.iconName || 'book'} size={48} color={themeColors.accent} style={{ marginBottom: 12, textAlign: 'center' }} />
+        <View style={{ alignItems: 'center', marginBottom: 24 }}>
+          <Ionicons name={ceremoniesList.find(c => c.key === selected)?.iconName || 'book'} size={48} color={themeColors.accent} />
+        </View>
         <Text style={styles.ceremonyTitle}>{ceremony[lang]}</Text>
-        <Text style={styles.text}>{content}</Text>
+
+        {content.split('\n\n').map((section, idx) => {
+          const lines = section.split('\n');
+          return (
+            <View key={idx}>
+              {lines.map((line, lineIdx) => {
+                const isNumSection = /^\d+\./.test(line);
+                const isBullet = line.trim().startsWith('-');
+                if (isNumSection) {
+                  return (
+                    <Text key={lineIdx} style={styles.sectionNum}>
+                      {line}
+                    </Text>
+                  );
+                }
+                if (isBullet) {
+                  return (
+                    <Text key={lineIdx} style={styles.sectionText}>
+                      • {line.trim().substring(1).trim()}
+                    </Text>
+                  );
+                }
+                return line.trim() ? (
+                  <Text key={lineIdx} style={styles.sectionText}>
+                    {line}
+                  </Text>
+                ) : null;
+              })}
+            </View>
+          );
+        })}
       </ScrollView>
     </View>
   );

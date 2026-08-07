@@ -15,7 +15,6 @@ import PreachScreen from './src/screens/PreachScreen';
 import EditScreen from './src/screens/EditScreen';
 import BibleModule from './src/screens/BibleModule';
 import DevocionalScreen from './src/screens/DevocionalScreen';
-import MinisterManualScreen from './src/screens/MinisterManualScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 
 type Screen =
@@ -24,7 +23,7 @@ type Screen =
   | { name: 'preach'; id: string }
   | { name: 'edit'; id: string };
 
-type Tab = 'biblia' | 'devocional' | 'sermones' | 'manual' | 'ajustes';
+type Tab = 'biblia' | 'devocional' | 'sermones' | 'ajustes';
 
 function emptySermon(): Sermon {
   const now = Date.now();
@@ -140,8 +139,6 @@ export default function App() {
             renderSermones()
           ) : tab === 'devocional' ? (
             <DevocionalScreen />
-          ) : tab === 'manual' ? (
-            <MinisterManualScreen />
           ) : tab === 'ajustes' ? (
             <SettingsScreen />
           ) : (
@@ -152,7 +149,6 @@ export default function App() {
         {!isFullscreen && (
           <View style={styles.tabBar}>
             <TabButton label="Devocional" icon="sparkles" active={tab === 'devocional'} onPress={() => setTab('devocional')} />
-            <TabButton label="Manual" icon="document" active={tab === 'manual'} onPress={() => setTab('manual')} />
             <TabButton
               label="Sermones"
               icon="albums"

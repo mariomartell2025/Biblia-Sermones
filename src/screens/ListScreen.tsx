@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { Sermon } from '../types';
 import { theme } from '../theme';
+import { useSettings } from '../SettingsContext';
+import { t } from '../settings';
 import MinisterManualScreen from './MinisterManualScreen';
 
 type Props = {
@@ -11,17 +13,21 @@ type Props = {
 };
 
 export default function ListScreen({ sermons, onOpen, onNew }: Props) {
+  const settings = useSettings();
+  const lang = settings.language as 'es' | 'en';
   const [tab, setTab] = useState<'sermones' | 'manual'>('sermones');
+
+  const manualLabel = lang === 'es' ? 'Manual del Ministro' : 'Minister\'s Manual';
 
   if (tab === 'manual') {
     return (
       <View style={styles.container}>
         <View style={styles.tabsBar}>
           <Pressable style={[styles.tab, tab === 'sermones' && styles.tabActive]} onPress={() => setTab('sermones')}>
-            <Text style={[styles.tabLabel, tab === 'sermones' && styles.tabLabelActive]}>Sermones</Text>
+            <Text style={[styles.tabLabel, tab === 'sermones' && styles.tabLabelActive]}>{t('sermones', lang)}</Text>
           </Pressable>
           <Pressable style={[styles.tab, tab === 'manual' && styles.tabActive]} onPress={() => setTab('manual')}>
-            <Text style={[styles.tabLabel, tab === 'manual' && styles.tabLabelActive]}>Manual del Ministro</Text>
+            <Text style={[styles.tabLabel, tab === 'manual' && styles.tabLabelActive]}>{manualLabel}</Text>
           </Pressable>
         </View>
         <MinisterManualScreen />
@@ -33,17 +39,17 @@ export default function ListScreen({ sermons, onOpen, onNew }: Props) {
     <View style={styles.container}>
       <View style={styles.tabsBar}>
         <Pressable style={[styles.tab, tab === 'sermones' && styles.tabActive]} onPress={() => setTab('sermones')}>
-          <Text style={[styles.tabLabel, tab === 'sermones' && styles.tabLabelActive]}>Sermones</Text>
+          <Text style={[styles.tabLabel, tab === 'sermones' && styles.tabLabelActive]}>{t('sermones', lang)}</Text>
         </Pressable>
         <Pressable style={[styles.tab, tab === 'manual' && styles.tabActive]} onPress={() => setTab('manual')}>
-          <Text style={[styles.tabLabel, tab === 'manual' && styles.tabLabelActive]}>Manual del Ministro</Text>
+          <Text style={[styles.tabLabel, tab === 'manual' && styles.tabLabelActive]}>{manualLabel}</Text>
         </Pressable>
       </View>
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Sermones</Text>
+        <Text style={styles.headerTitle}>{t('sermones', lang)}</Text>
         <Pressable style={styles.newBtn} onPress={onNew}>
-          <Text style={styles.newBtnText}>+ Nuevo</Text>
+          <Text style={styles.newBtnText}>+ {lang === 'es' ? 'Nuevo' : 'New'}</Text>
         </Pressable>
       </View>
 
@@ -52,7 +58,7 @@ export default function ListScreen({ sermons, onOpen, onNew }: Props) {
         keyExtractor={(s) => s.id}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <Text style={styles.empty}>Aún no tienes sermones. Toca “+ Nuevo”.</Text>
+          <Text style={styles.empty}>{lang === 'es' ? 'Aún no tienes sermones. Toca “+ Nuevo”.' : 'You don\'t have any sermons yet. Tap “+ New”.'}</Text>
         }
         renderItem={({ item }) => (
           <Pressable style={styles.card} onPress={() => onOpen(item.id)}>

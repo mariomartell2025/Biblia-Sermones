@@ -10,6 +10,7 @@ export default function SettingsScreen() {
   const themeColors = useTheme();
   const lang = settings.language;
   const [updating, setUpdating] = useState(false);
+  const [fontSize, setFontSize] = useState(settings.fontSize);
 
   const themeOptions: Theme[] = ['light', 'dark', 'sepia'];
   const languageOptions: Language[] = ['es', 'en'];
@@ -124,21 +125,29 @@ export default function SettingsScreen() {
           <View style={[styles.sliderContainer, { justifyContent: 'center' }]}>
             <Pressable
               style={[styles.optionBtn, { flex: 0, width: 50 }]}
-              onPress={() => settings.setFontSize(Math.max(14, settings.fontSize - 1))}
+              onPress={() => {
+                const newSize = Math.max(14, fontSize - 1);
+                setFontSize(newSize);
+                settings.setFontSize(newSize);
+              }}
             >
               <Text style={[styles.optionText, { fontSize: 20 }]}>−</Text>
             </Pressable>
             <Text style={[styles.sliderLabel, { width: 'auto', marginHorizontal: 16, fontSize: 16, fontWeight: '800', color: themeColors.text }]}>
-              {settings.fontSize}
+              {fontSize}
             </Text>
             <Pressable
               style={[styles.optionBtn, { flex: 0, width: 50 }]}
-              onPress={() => settings.setFontSize(Math.min(20, settings.fontSize + 1))}
+              onPress={() => {
+                const newSize = Math.min(20, fontSize + 1);
+                setFontSize(newSize);
+                settings.setFontSize(newSize);
+              }}
             >
               <Text style={[styles.optionText, { fontSize: 20 }]}>+</Text>
             </Pressable>
           </View>
-          <Text style={styles.preview}>
+          <Text style={[styles.preview, { fontSize }]}>
             Abc 123 Versículo
           </Text>
         </View>
