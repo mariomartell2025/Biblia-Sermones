@@ -447,29 +447,45 @@ function Reader({
   // movimiento es claramente horizontal para no interferir con el scroll vertical.
   // navRef evita que el PanResponder (creado una sola vez) quede con next/prev
   // obsoletos de un capítulo anterior.
+  const SWIPE_ACTIVATE = 24; // a partir de aquí, el gesto se considera "deslizar"
+  const SWIPE_COMMIT = 60; // a partir de aquí, se cambia de capítulo al soltar
   const navRef = useRef({ next, prev });
   useEffect(() => { navRef.current = { next, prev }; });
   const swipeX = useRef(new Animated.Value(0)).current;
+  const hintOpacity = useRef(new Animated.Value(0)).current;
+  const showSwipeHint = () => {
+    Animated.sequence([
+      Animated.timing(hintOpacity, { toValue: 1, duration: 150, useNativeDriver: true }),
+      Animated.delay(1400),
+      Animated.timing(hintOpacity, { toValue: 0, duration: 250, useNativeDriver: true }),
+    ]).start();
+  };
   const swipe = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 24 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > SWIPE_ACTIVATE && Math.abs(g.dx) > Math.abs(g.dy) * 2,
       onPanResponderMove: (_, g) => swipeX.setValue(g.dx),
       onPanResponderRelease: (_, g) => {
-        if (g.dx < -60) navRef.current.next();
-        else if (g.dx > 60) navRef.current.prev();
-        Animated.timing(swipeX, { toValue: 0, duration: 180, useNativeDriver: true }).start();
+        const abs = Math.abs(g.dx);
+        if (g.dx < -SWIPE_COMMIT) navRef.current.next();
+        else if (g.dx > SWIPE_COMMIT) navRef.current.prev();
+        else if (abs >= SWIPE_ACTIVATE) showSwipeHint(); // deslizó, pero no lo suficiente: avisar que se puede
+        Animated.spring(swipeX, { toValue: 0, useNativeDriver: true, speed: 20, bounciness: 6 }).start();
       },
       onPanResponderTerminate: () => {
-        Animated.timing(swipeX, { toValue: 0, duration: 180, useNativeDriver: true }).start();
+        Animated.spring(swipeX, { toValue: 0, useNativeDriver: true, speed: 20, bounciness: 6 }).start();
       },
     })
   ).current;
   const prevTrailOpacity = swipeX.interpolate({ inputRange: [0, 90], outputRange: [0, 0.9], extrapolate: 'clamp' });
   const nextTrailOpacity = swipeX.interpolate({ inputRange: [-90, 0], outputRange: [0.9, 0], extrapolate: 'clamp' });
-  // Efecto de "página": el contenido acompaña el dedo con resistencia y se
-  // desvanece un poco, como si la hoja se estuviera despegando al deslizar.
-  const contentTranslate = Animated.multiply(swipeX, 0.35);
-  const contentOpacity = swipeX.interpolate({ inputRange: [-150, 0, 150], outputRange: [0.5, 1, 0.5], extrapolate: 'clamp' });
+  // Efecto de "página": la hoja gira levemente sobre su eje vertical (perspective +
+  // rotateY, ambos parte de React Native core) como si se estuviera despegando,
+  // en vez de solo deslizarse plana.
+  const pageTranslate = Animated.multiply(swipeX, 0.5);
+  const pageRotateY = swipeX.interpolate({ inputRange: [-220, 0, 220], outputRange: ['10deg', '0deg', '-10deg'], extrapolate: 'clamp' });
+  const pageOpacity = swipeX.interpolate({ inputRange: [-220, 0, 220], outputRange: [0.75, 1, 0.75], extrapolate: 'clamp' });
+  const shadowLeftOpacity = swipeX.interpolate({ inputRange: [0, 220], outputRange: [0, 0.35], extrapolate: 'clamp' });
+  const shadowRightOpacity = swipeX.interpolate({ inputRange: [-220, 0], outputRange: [0.35, 0], extrapolate: 'clamp' });
 
   return (
     <View style={styles.container} {...swipe.panHandlers}>
@@ -485,6 +501,17 @@ function Reader({
         style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 60, zIndex: 5, alignItems: 'flex-end', justifyContent: 'center', paddingRight: 8, opacity: nextTrailOpacity }}
       >
         <Ionicons name="chevron-forward" size={30} color={themeColors.accent} />
+      </Animated.View>
+      {/* Sombra que simula la hoja levantándose por el borde mientras se desliza */}
+      <Animated.View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 24, zIndex: 4, backgroundColor: '#000', opacity: shadowLeftOpacity }} />
+      <Animated.View pointerEvents="none" style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 24, zIndex: 4, backgroundColor: '#000', opacity: shadowRightOpacity }} />
+      {/* Aviso cuando el gesto se detecta pero no llega a cambiar de capítulo */}
+      <Animated.View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 100, alignSelf: 'center', zIndex: 6, opacity: hintOpacity, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: themeColors.card, borderWidth: 1, borderColor: themeColors.cardBorder, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 }}
+      >
+        <Ionicons name="swap-horizontal" size={14} color={themeColors.accent} />
+        <Text style={{ color: themeColors.text, fontSize: 12, fontWeight: '700' }}>Desliza más para cambiar de capítulo</Text>
       </Animated.View>
       <View style={styles.subHead}>
         <Pressable onPress={onBooks} hitSlop={12} style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -509,7 +536,13 @@ function Reader({
         onPick={(v) => { setVersionId(v.id); setPickerOpen(false); }}
         onLocked={(v) => (typeof alert === 'function' ? alert(`${v.name} estará disponible con la suscripción. Estamos gestionando la licencia.`) : null)}
       />
-      <Animated.View style={{ flex: 1, transform: [{ translateX: contentTranslate }], opacity: contentOpacity }}>
+      <Animated.View
+        style={{
+          flex: 1,
+          opacity: pageOpacity,
+          transform: [{ perspective: 800 }, { translateX: pageTranslate }, { rotateY: pageRotateY }],
+        }}
+      >
         <ScrollView ref={scrollRef} contentContainerStyle={[styles.readerBody, rStyles.scrollContent]}>
           <Text style={styles.chapterTitle}>{b.name} {chapter}</Text>
           {verses.map((v, i) => {
