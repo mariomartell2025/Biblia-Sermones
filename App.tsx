@@ -3,6 +3,12 @@ import { View, Text, Pressable, StyleSheet, ActivityIndicator, BackHandler, Toas
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import mobileAds from 'react-native-google-mobile-ads';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Mantiene visible el splash nativo (con el logo, fondo oscuro) hasta que
+// haya contenido real que mostrar, en vez de dejar que Android lo oculte
+// solo y se vea un parpadeo en blanco/gris mientras carga el JS.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 import { initBibleDb } from './src/bible/db';
 import { Sermon } from './src/types';
@@ -44,6 +50,9 @@ export default function App() {
     loadSermons().then(setSermons);
   }, []);
   useEffect(() => { mobileAds().initialize(); }, []);
+  useEffect(() => {
+    if (sermons) SplashScreen.hideAsync().catch(() => {});
+  }, [sermons]);
 
   // Botón/gesto de retroceso de Android: navega dentro de la app en vez de
   // cerrarla de inmediato. En la raíz de una pestaña, pide un segundo toque
