@@ -3,6 +3,7 @@ import {
   View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator,
   useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { Devotional } from '../types';
 import { loadDevotionals, saveDevotionals, generateDevotional } from '../devocional/generate';
@@ -48,12 +49,16 @@ export default function DevocionalScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.head}>
-        <View>
-          <Text style={styles.h1}>Devocional</Text>
-          <Text style={styles.headDate}>{sel.date} · {sel.theme}</Text>
-        </View>
+        <Text style={styles.h1}>Devocional</Text>
         <Pressable style={[styles.genBtn, generating && { opacity: 0.6 }]} onPress={onGenerate} disabled={generating}>
-          <Text style={styles.genBtnText}>{generating ? '…' : '✨ Generar'}</Text>
+          {generating ? (
+            <Text style={styles.genBtnText}>…</Text>
+          ) : (
+            <>
+              <Ionicons name="add" size={16} color={theme.accentText} />
+              <Text style={styles.genBtnText}>Generar</Text>
+            </>
+          )}
         </Pressable>
       </View>
 
@@ -64,7 +69,6 @@ export default function DevocionalScreen() {
             <Text style={styles.keyVerseRef}>✝  {sel.keyVerse.ref}</Text>
             <Text style={styles.keyVerseText}>{sel.keyVerse.text}</Text>
           </View>
-          {sel.source === 'ia' && <Text style={styles.iaTag}>✨ Generado con IA</Text>}
         </View>
 
         <Carousel devotional={sel} />
@@ -81,7 +85,7 @@ export default function DevocionalScreen() {
             <Pressable key={d.id} style={[styles.histCard, d.id === sel.id && styles.histCardOn]} onPress={() => setSelId(d.id)}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.histTitle} numberOfLines={1}>{d.title}</Text>
-                <Text style={styles.histMeta}>{d.date} · {d.keyVerse.ref}{d.source === 'ia' ? ' · ✨' : ''}</Text>
+                <Text style={styles.histMeta}>{d.date} · {d.keyVerse.ref}</Text>
               </View>
             </Pressable>
           ))}
@@ -175,15 +179,13 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   head: { backgroundColor: theme.header, paddingTop: 52, paddingBottom: 16, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   h1: { color: theme.text, fontSize: 28, fontWeight: '800' },
-  headDate: { color: theme.textMuted, fontSize: 13, marginTop: 2 },
-  genBtn: { backgroundColor: theme.accent, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9 },
+  genBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: theme.accent, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9 },
   genBtnText: { color: theme.accentText, fontWeight: '800', fontSize: 14 },
   pad: { padding: 16 },
   title: { color: theme.text, fontSize: 25, fontWeight: '800', letterSpacing: -0.5 },
   keyVerse: { backgroundColor: '#1a2740', borderLeftWidth: 3, borderLeftColor: theme.accent, borderRadius: 10, padding: 14, marginTop: 12 },
   keyVerseRef: { color: theme.accent, fontWeight: '800', fontSize: 14, marginBottom: 6 },
   keyVerseText: { color: theme.text, fontSize: 15, lineHeight: 22, fontStyle: 'italic' },
-  iaTag: { color: theme.accent, fontSize: 12, fontWeight: '700', marginTop: 10 },
   rowlbl: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 4, marginBottom: 10 },
   sectionLabel2: { color: theme.textMuted, fontSize: 12, fontWeight: '800', letterSpacing: 0.5, textTransform: 'uppercase' },
   counter: { color: theme.accent, fontSize: 13, fontWeight: '800' },
