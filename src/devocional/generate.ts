@@ -9,6 +9,10 @@ const KEY = 'devocionales:v1';
 // Cuando despliegues el endpoint (ver server/devocional-endpoint.js), pon aquí su URL.
 export const BACKEND_URL = '';
 
+// Debe coincidir con DEVOCIONAL_API_KEY del servidor (ver server/devocional-endpoint.js).
+// Déjala vacía si no vas a usar el backend de IA.
+export const BACKEND_API_KEY = '';
+
 export async function loadDevotionals(): Promise<Devotional[]> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
@@ -41,7 +45,7 @@ export async function generateDevotional(theme?: string, existing: Devotional[] 
   if (BACKEND_URL) {
     const res = await fetch(`${BACKEND_URL}/devocional`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': BACKEND_API_KEY },
       body: JSON.stringify({ theme, date: today() }),
     });
     if (!res.ok) throw new Error(`Backend respondió ${res.status}`);

@@ -11,19 +11,33 @@
  * Requisitos:
  *   npm i express @anthropic-ai/sdk
  *   export ANTHROPIC_API_KEY=sk-ant-...
+ *   export DEVOCIONAL_API_KEY=... (secreto propio; la app lo manda en el header x-api-key)
  *   node server/devocional-endpoint.js
  *
  * Necesita los mismos datos que la app: assets/bible/index.json y assets/bible/rvr.json
  * (para insertar el texto EXACTO del versículo, no una paráfrasis del modelo).
  */
 const express = require('express');
+const crypto = require('crypto');
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
 
+const API_KEY = process.env.DEVOCIONAL_API_KEY;
+if (!API_KEY) {
+  console.error('Falta DEVOCIONAL_API_KEY en el entorno. El servidor no arrancará sin ella.');
+  process.exit(1);
+}
+
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 const client = new Anthropic(); // usa ANTHROPIC_API_KEY del entorno
+
+function timingSafeEqual(a, b) {
+  const bufA = Buffer.from(String(a)); const bufB = Buffer.from(String(b));
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 // Biblia (Reina Valera, dominio público) para citar el versículo con exactitud.
 const INDEX = JSON.parse(fs.readFileSync(path.join(__dirname, '../assets/bible/index.json'), 'utf8'));
@@ -83,8 +97,20 @@ Reglas:
 No incluyas el texto del versículo tú mismo (el servidor lo insertará exacto).`;
 
 app.post('/devocional', async (req, res) => {
+  const providedKey = req.get('x-api-key');
+  if (!providedKey || !timingSafeEqual(providedKey, API_KEY)) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
+  const { theme, date } = req.body || {};
+  if (theme !== undefined && (typeof theme !== 'string' || theme.length === 0 || theme.length > 120)) {
+    return res.status(400).json({ error: 'theme inválido: debe ser texto de 1 a 120 caracteres' });
+  }
+  if (date !== undefined && (typeof date !== 'string' || date.length > 20)) {
+    return res.status(400).json({ error: 'date inválido: debe ser texto de hasta 20 caracteres' });
+  }
+
   try {
-    const { theme, date } = req.body || {};
     const userMsg = theme
       ? `Genera un devocional para hoy (${date || ''}) sobre el tema: "${theme}".`
       : `Genera un devocional para hoy (${date || ''}). Elige tú un tema y un versículo base que no sean de los más trillados.`;
@@ -122,7 +148,7 @@ app.post('/devocional', async (req, res) => {
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: 'Error generando el devocional' });
   }
 });
 
